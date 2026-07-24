@@ -489,7 +489,7 @@ def aggregate_prompt_html(state: dict[str, object], state_path: Path) -> str:
         body = f'{sheet}<div class="aggregate-prompt-area">{body}</div>'
     return f"""
         <section class="panel">
-          <h2>整片生成提示词</h2>
+          <h2>合并提示词及分镜</h2>
           <div class="{card_class}">
           {body}
           </div>

@@ -888,21 +888,18 @@
         <article class="method-row">
           <div class="method-index">01</div>
           <div class="method-name">还原度低：自由发挥</div>
-          <div class="method-description">适合氛围、情绪和环境建立镜头。使用画面提示词、角色设定与场景参考，允许模型自行补充构图、动作和画面细节。</div>
+          <div class="method-description">适合氛围、情绪和环境建立镜头。只使用完整提示词，不附加角色、场景或分镜图片参考，允许模型自行补充构图、动作和画面细节。</div>
           <div class="method-inputs" aria-label="建议输入">
-            <span class="method-input">提示词</span>
-            <span class="method-input">角色参考</span>
-            <span class="method-input">场景参考</span>
+            <span class="method-input">纯提示词</span>
           </div>
         </article>
 
         <article class="method-row">
           <div class="method-index">02</div>
           <div class="method-name">还原度中：允许小幅偏离</div>
-          <div class="method-description">适合主体、场景和大构图需要稳定，但动作过程可以适度发挥的镜头。逐镜提示词完整写清构图、起始状态、动作路径、运镜和落点，可搭配用户实际提供的主体与场景参考。</div>
+          <div class="method-description">适合主体、场景和大构图需要稳定，但动作过程可以适度发挥的镜头。使用分镜合集图稳定整体镜头关系，并用提示词写清当前镜头的起始状态、动作路径、运镜和落点。</div>
           <div class="method-inputs" aria-label="建议输入">
-            <span class="method-input">主体参考</span>
-            <span class="method-input">场景参考</span>
+            <span class="method-input">分镜合集图</span>
             <span class="method-input">提示词</span>
           </div>
         </article>
@@ -910,11 +907,10 @@
         <article class="method-row">
           <div class="method-index">03</div>
           <div class="method-name">还原度高：基本不能偏</div>
-          <div class="method-description">适合关键动作、产品展示、空间连续性或重要转场。用文本明确起始状态、主体与镜头的完整路径、可见结果、连续性和禁止项；必要时拆短镜头分段生成。</div>
+          <div class="method-description">适合关键动作、产品展示、空间连续性或重要转场。使用对应的单独分镜图与分镜提示词，明确起始状态、主体与镜头的完整路径、可见结果、连续性和禁止项；必要时拆短镜头分段生成。</div>
           <div class="method-inputs" aria-label="建议输入">
-            <span class="method-input">产品/主体参考</span>
-            <span class="method-input">场景/风格参考</span>
-            <span class="method-input">提示词</span>
+            <span class="method-input">单独分镜图</span>
+            <span class="method-input">分镜提示词</span>
           </div>
         </article>
       </div>
