@@ -1,5 +1,7 @@
 # Storyboard Director
 
+<img width="2560" height="1440" alt="封面_1" src="https://github.com/user-attachments/assets/f582d322-6fd5-4ece-89c6-943c225a75be" />
+
 一套用于 Codex 的故事板制作 Skill。
 
 它可以把故事想法整理成完整的分镜脚本，生成逐镜线稿，并将分镜文字、参考图、线稿和提示词汇总到一个本地 HTML 页面中。线稿确认后，它还会生成一份按镜头顺序编排的视频提示词。
