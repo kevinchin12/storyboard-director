@@ -1,0 +1,11 @@
+{
+  "name": "storyboard-scene-pipeline",
+  "version": "1.0.0",
+  "paths": {
+    "sessions_dir": "sessions",
+    "examples_dir": "examples",
+    "assets_dirname": "assets",
+    "state_filename": "session.json",
+    "html_filename": "session.html"
+  }
+}

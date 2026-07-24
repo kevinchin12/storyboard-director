@@ -1,0 +1,4 @@
+interface:
+  display_name: "Storyboard Script Planner"
+  short_description: "Prepare shots, anchors, prompts, and text review"
+  default_prompt: "Use $storyboard-script-planner to prepare the approved script package for this storyboard session."

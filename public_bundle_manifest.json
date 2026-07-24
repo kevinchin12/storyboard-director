@@ -1,0 +1,15 @@
+{
+  "bundle_name": "storyboard-scene-pipeline-public",
+  "include": [
+    "README.md",
+    "LICENSE",
+    "requirements.txt",
+    "public_bundle_manifest.json",
+    "docs",
+    ".gitignore",
+    "storyboard.config.json",
+    "sessions/.gitkeep",
+    "examples",
+    "storyboard-scene-pipeline-skill"
+  ]
+}

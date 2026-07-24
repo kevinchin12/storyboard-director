@@ -1,0 +1,357 @@
+{
+  "project_title": "Story Session",
+  "project_title_en": "",
+  "project_summary": "待补充故事摘要。这个页面用于集中记录故事想法、角色设定图、场景图、脚本、线稿和合并版提示词。",
+  "workflow_mode": "prompt_control_no_ai_review",
+  "aspect_ratio": "16:9",
+  "display_options": {
+    "show_final_frames": false,
+    "show_storyboard_sheet": false,
+    "show_visual_references": true,
+    "show_durations": false,
+    "show_text_review": false
+  },
+  "parallel_generation": {
+    "enabled": true,
+    "multi_agent_required": true,
+    "state_writer": "orchestrator_only",
+    "dispatch_policy": "mandatory_for_independent_batches",
+    "dispatch_mode": "multi_agent",
+    "min_parallel_batch_size": 2,
+    "max_line_art_workers": 4,
+    "max_final_frame_workers": 3,
+    "reduced_concurrency_reason": "",
+    "worker_input": [
+      "session_path",
+      "assets_dir",
+      "project_mode",
+      "aspect_ratio",
+      "compact_production_reference",
+      "style_rules_when_needed",
+      "shot_id",
+      "prompt_text",
+      "reference_image_paths",
+      "target_output_path"
+    ],
+    "worker_output": [
+      "shot_id",
+      "asset_type",
+      "status",
+      "output_path",
+      "retry_prompt_if_failed",
+      "short_note"
+    ],
+    "rules": [
+      "线稿或最终帧批次中只要有 2 个及以上独立镜头，主 Agent 必须先创建 worker queue，再开始生图。",
+      "多 Agent 执行是默认必选项；使用本 skill 即视为默认允许独立生图 job 走子 Agent / worker delegation，除非用户明确要求串行。",
+      "生成前必须写入 dispatch_mode：multi_agent / reduced_concurrency / serial_unavailable。",
+      "只有当前环境没有可调用子 Agent / worker 能力，或工具策略阻止时，才能使用 serial_unavailable，并必须写清 reduced_concurrency_reason。",
+      "子 Agent 或串行 worker job 只负责生成图片并返回本地路径。",
+      "子 Agent 不改 session.json，不渲染 HTML，不重写脚本，不做图后审核。",
+      "主 Agent 按 worker 完成顺序串行合并结果、检查文件存在、写 JSON、刷新 HTML；HTML 展示顺序仍按 Shot 顺序。",
+      "所有 worker 必须使用 session.aspect_ratio；用户未指定时默认 16:9。",
+      "强身份一致性或连续空间项目可以把最终帧并发降到 1-2，但必须在 reduced_concurrency_reason 记录原因。"
+    ]
+  },
+  "project_mode": "character",
+  "current_stage": "outline",
+  "stages": [
+    {
+      "key": "outline",
+      "label": "01 Outline",
+      "description": "Idea intake and scope lock"
+    },
+    {
+      "key": "script",
+      "label": "02 Script",
+      "description": "Shot list, action, timing, continuity"
+    },
+    {
+      "key": "revision",
+      "label": "03 Revision",
+      "description": "Approved changes on same shot structure"
+    },
+    {
+      "key": "line-art",
+      "label": "04 Line Art",
+      "description": "Structure lock before style rendering"
+    },
+    {
+      "key": "style",
+      "label": "05 Style",
+      "description": "Reference extraction and limits"
+    },
+    {
+      "key": "final",
+      "label": "06 Final Scenes",
+      "description": "Final prompts, outputs, delivery checks"
+    }
+  ],
+  "outline": {
+    "status": "waiting",
+    "text": "把用户提供的故事想法、场景说明、角色设定说明贴在这里。",
+    "working_summary": "用 2-4 句概括故事主线、角色/场景锚点和线稿交付方向。"
+  },
+  "visual_references": {
+    "characters": [
+      {
+        "label": "角色设定图 01",
+        "path": "",
+        "description": "用户提供角色设定图后，把本地路径和身份锁定说明写在这里。"
+      }
+    ],
+    "scenes": [
+      {
+        "label": "场景图 01",
+        "path": "",
+        "description": "用户提供场景图后，把本地路径和场景锁定说明写在这里。"
+      }
+    ],
+    "usage_note": "数量不定；有用户提供的角色设定图和场景图时，先保存到 session assets 并登记到这里。没有提供时，Codex 在合并版提示词前置区撰写主体和场景描述。"
+  },
+  "script": {
+    "status": "not started",
+    "review_notes": [
+      "等待脚本包：画面比例、完整分镜文字、production anchors、逐镜线稿提示词和 prompt preflight。用户未指定画面比例时默认 16:9。",
+      "第一轮脚本包默认直接包含分镜文字和逐镜线稿脚本；不要拆成先写分镜、再另起一轮补线稿提示词，除非 brief 真的阻塞。",
+      "记录 creator 的修改意见。",
+      "确认哪些镜头已锁定，哪些还需重写；无修改时不单独进入 revision 阶段。生成后默认不做 AI 视觉审核。"
+    ],
+    "open_questions": [
+      "是否已有明确的角色设定、世界观或镜头数量限制？",
+      "最终画面偏单张叙事图，还是连续镜头组图？"
+    ]
+  },
+  "text_review": {
+    "status": "pending",
+    "mode": "text_only_pre_generation",
+    "rules": [
+      "只审脚本和提示词文本，不上传生成后的线稿做 AI 图像审核。",
+      "脚本确认前检查：镜头顺序、因果关系、动作连续性、机位动机、空间/角色/道具连续性。",
+      "线稿生成前检查：每个 line-art prompt 是否只要求轮廓线稿，是否锁定主体、场景、动作、构图、透视和不可漂移项。",
+      "如果文本审查发现会影响多个镜头的问题，先回到脚本修改，不进入生图。",
+      "如果只发现单个镜头的提示词风险，先改该镜头 line-art prompt，再进入并行生图。"
+    ],
+    "script_logic_check": {
+      "status": "pending",
+      "summary": "待检查脚本逻辑、镜头功能、因果顺序、动作路径、机位动机和连续性。",
+      "blocking_issues": [],
+      "fixes_applied": []
+    },
+    "line_art_prompt_preflight": {
+      "status": "pending",
+      "summary": "待检查线稿提示词是否足够清晰、轻量、contour-only，并且与脚本一致。",
+      "blocking_issues": [],
+      "fixes_applied": []
+    }
+  },
+  "production_reference": {
+    "primary_anchor": [
+      "待填写主要锚点。角色片写脸部年龄感、发型、服装剪影、关键道具、身体比例、姿态和运动质感；主体片写主体形态和材质；空间片写地点识别特征；氛围片写光线和材质核心规则。",
+      "待填写跨镜头必须保持一致的主体/地点/氛围核心特征。"
+    ],
+    "continuity_rules": [
+      "待填写跨镜头连续性规则。角色片写角色一致性；空间片写地点和天气连续性；氛围片写光线和节奏连续性。",
+      "待填写什么必须锁定，什么允许变化，例如机位距离、光线状态、道具开合、动作阶段。"
+    ],
+    "world_lock": [
+      "待填写世界观视觉锚点、主要空间、色彩逻辑和不可漂移场景元素。若是非叙事空间片，可写地点/材质/时间段规则。"
+    ],
+    "video_asset_policy": [
+      "新默认流程只到线稿和合并版提示词；不默认生成最终静态帧或合并版最终画面图。",
+      "默认不指定优先视频测试镜头；平台测试是用户可选操作。",
+      "图片资产只保存为 assets/ 下的本地文件路径，不把图片数据、截图原文或长历史塞进 session.json。"
+    ]
+  },
+  "character_performance_lock": {
+    "identity_anchor": [
+      "角色片必填：脸部年龄感、脸型/发型、服装剪影、关键道具、身体比例、姿态和运动质感。",
+      "没有用户角色参考图时，也要写一个简短但稳定的原创角色设定，避免后续每镜头重新发明人物。"
+    ],
+    "acting_path_rules": [
+      "每个角色镜头都写起点姿态/视线/手部位置 -> 可见动作过程 -> 落点姿态或停顿反应。",
+      "慢而连贯的微动作优先，例如视线移动、肩膀转向、手指收紧、重心转移、迈步、伸手、后缩、定住。"
+    ],
+    "reference_roles": [
+      "角色图默认只锁身份、脸、体型、服装和比例，不锁构图或动作。",
+      "动作参考视频只锁身体运动或节奏；运镜参考视频只锁镜头路径；两者都不能覆盖角色身份和场景，除非用户明确要求。"
+    ],
+    "drift_risks": [
+      "避免只写一个女孩/一个男人/人物走路/人物转身/情绪低落这类泛化描述。",
+      "避免一条视频提示词里塞走路、转身、伸手、说话、反应等多个不相干动作。"
+    ]
+  },
+  "shots": [
+    {
+      "id": "Shot 01",
+      "status": "pending",
+      "aspect_ratio": "16:9",
+      "duration": "4s",
+      "purpose": "待填写",
+      "frame": "待填写",
+      "action": "待填写。推荐按 起点姿态/触发 -> 可见动作过程 -> 落点/停顿反应 -> 空间关系 -> 可见结果 写，只保留一个主要动作节拍。",
+      "camera": "待填写一个明确机位或物理镜头路径。",
+      "continuity": "待填写锁定项、允许变化项，以及与相邻镜头的具体空间关系。",
+      "line_art": "待填写",
+      "style_notes": "默认不填写；只有用户要求提供风格参考并生成对应画面时再启用。",
+      "final_prompt": "默认隐藏；只有用户要求提供风格参考并生成对应画面时再填写。",
+      "video_prompt": {
+        "seedance2": "Shot 01 | <scene role>: <composition/environment>. <subject action>. Camera: <camera motion>. Motion cue: <what visibly changes>.",
+        "reference_frame": "",
+        "duration": "4s",
+        "primary_motion": "待填写起点 -> 过程 -> 落点的单一主要动作",
+        "camera_motion": "待填写镜头运动",
+        "preserve": [
+          "待填写不可漂移项；角色片至少包含脸、年龄感、发型、服装剪影、关键道具"
+        ],
+        "avoid": [
+          "待填写避免项"
+        ],
+        "audio": "待填写音频策略，可写 none",
+        "notes": "可直贴平台的文本自包含单镜头段落。线稿和最终帧只作内部编写依据；默认不要求用户上传或 @ 单镜分镜资产。"
+      },
+      "video_readiness": {
+        "status": "blocked_until_line_art_confirmed",
+        "first_frame_path": "",
+        "motion_intensity": "待填写",
+        "camera_motion": "待填写",
+        "risk_level": "待填写",
+        "must_preserve": [
+          "待填写视频生成时不可漂移的主体/构图/风格/空间规则。"
+        ],
+        "test_status": "not_started"
+      },
+      "output": "待填写"
+    },
+    {
+      "id": "Shot 02",
+      "status": "pending",
+      "aspect_ratio": "16:9",
+      "duration": "4s",
+      "purpose": "待填写",
+      "frame": "待填写",
+      "action": "待填写",
+      "camera": "待填写",
+      "continuity": "待填写",
+      "line_art": "待填写",
+      "style_notes": "待填写",
+      "final_prompt": "待填写",
+      "video_prompt": {
+        "seedance2": "Shot 02 | <scene role>: <composition/environment>. <subject action>. Camera: <camera motion>. Motion cue: <what visibly changes>.",
+        "reference_frame": "",
+        "duration": "4s",
+        "primary_motion": "待填写起点 -> 过程 -> 落点的单一主要动作",
+        "camera_motion": "待填写镜头运动",
+        "preserve": [
+          "待填写不可漂移项；角色片至少包含脸、年龄感、发型、服装剪影、关键道具"
+        ],
+        "avoid": [
+          "待填写避免项"
+        ],
+        "audio": "待填写音频策略，可写 none",
+        "notes": "可直贴平台的文本自包含单镜头段落。线稿和最终帧只作内部编写依据；默认不要求用户上传或 @ 单镜分镜资产。"
+      },
+      "video_readiness": {
+        "status": "blocked_until_line_art_confirmed",
+        "first_frame_path": "",
+        "motion_intensity": "待填写",
+        "camera_motion": "待填写",
+        "risk_level": "待填写",
+        "must_preserve": [
+          "待填写视频生成时不可漂移的主体/构图/风格/空间规则。"
+        ],
+        "test_status": "not_started"
+      },
+      "output": "待填写"
+    }
+  ],
+  "line_art": {
+    "status": "blocked until script package approval",
+    "rules": [
+      "线稿只锁结构、主体关系和空间层次，不画材质完成度。",
+      "只保留外轮廓、主体剪影、主要物体边界、地平线/消失点/少量透视辅助线。",
+      "不要阴影、投影、明暗面、灰度填充、排线、交叉排线、点描、纸纹、材质、光效和装饰细节。",
+      "背景保持白色或浅米白，不要大面积灰色；线条保持细、干净、稀疏。",
+      "线稿长边默认约 1536px，单张通常应低于约 1.5MB；超过时重跑 contour-only 版本。",
+      "透视敏感或连续镜头场景，要先写清固定锚点、机位关系和允许变化项，再出线稿。",
+      "默认用 parallel_generation worker queue 并行生成线稿；每张完成后保存路径、刷新 HTML，不回传 AI 审核。"
+    ],
+    "prompt_block": "在这里汇总每个镜头的 contour-only 线稿提示词、不可漂移约束，以及同一空间连续运动时的空间连续性锁。",
+    "gallery": []
+  },
+  "style_reference": {
+    "status": "waiting for style reference image or text style lock",
+    "borrow": [
+      "待填写风格参考或文字风格锁的可借用部分。",
+      "待填写色彩、材质、镜头语言或完成度规则。",
+      "如果用户只给 IMAX / 电影写实 / 手绘水彩等风格词，也要先转成正式 borrow 规则，不强制等待图片。"
+    ],
+    "avoid": [
+      "待填写不能直接照搬的元素。",
+      "待填写容易导致漂移的风格风险。",
+      "文字风格锁需默认禁止过度 HDR、概念设定图感、真实地标复制、品牌、车牌和可读文字。"
+    ],
+    "structure_must_stay": [
+      "待填写需要从线稿中保持不变的结构规则；文字风格锁不能改构图、角色身份、产品形态或空间锚点。"
+    ],
+    "assets": [
+      {
+        "label": "Style Reference",
+        "path": "",
+        "note": "Attach style reference here when available; otherwise record the text style lock in borrow / avoid / structure_must_stay."
+      }
+    ]
+  },
+  "final_generation": {
+    "status": "hidden unless user requests style-reference final frames",
+    "prompt_strategy": "新默认流程不生成最终画面。只有用户要求提供风格参考之后生成对应画面时，才启用本区、显示画面栏和合并版最终画面图。",
+    "delivery_risks": [
+      "确认风格参考不会覆盖已批准构图。",
+      "确认相邻镜头的角色、道具和光线逻辑一致。",
+      "确认最终图不是单张好运气，而是可复做的流程。",
+      "默认隐藏画面相关部分；启用后每张保存路径、刷新 HTML，交给用户在 HTML 中复核。"
+    ],
+    "gallery": []
+  },
+  "video_generation": {
+    "status": "blocked until line art is approved",
+    "input_mode": "text_only",
+    "target_models": [
+      "Seedance 2.0"
+    ],
+    "prompt_strategy": "线稿确认后生成合并版提示词。前置区固定写主体、场景、音乐；后面按 Shot 顺序写每个镜头的画面、动作、镜头运动和可见变化。脚本阶段保留建议时长，但平台直贴提示词不写时长和画幅。",
+    "rules": [
+      "每个镜头只写一个主要动作，不把多个时间段硬塞进单条短视频提示词。",
+      "合并版和逐镜提示词必须文本自包含：把已确认线稿中的环境/构图、起始状态、空间关系、动作路径、运镜、可见变化、落点和连续性翻译成文字，不要求用户上传或 @ 线稿、最终帧、分镜合成板或本地资产路径。",
+      "默认 input_mode 为 text_only，逐镜 reference_frame 保持空值；只有用户明确选择 image_guided 并确认实际上传图片时才填写。",
+      "显式图片引用只允许指向用户实际提供的产品、主体、角色、场景或风格参考，不得把内部生成的单镜分镜资产伪装成用户输入。",
+      "角色片必须继承 character_performance_lock：主体身份写清脸部年龄感、发型、服装剪影、关键道具和运动质感；动作写成起点 -> 过程 -> 落点。",
+      "角色图、动作视频、运镜视频和音频如果同时使用，必须分别写清参考职责，不能让动作参考覆盖角色身份或场景。",
+      "多镜头项目默认逐镜头生成视频提示词，不把所有镜头合成一条不可控长提示词。",
+      "商业片、产品片、运动片和其他冲击力导向项目，脚本阶段就要避免相邻镜头构图和运动过于相似。",
+      "每个视频提示词都必须有一个可见动作幅度，例如主体响应、镜头移动、灯光扫动、环境反应或最终锁定。",
+      "连续镜头或 sampled phases 默认按 one physical camera path 书写；景别变化优先解释为物理位移，不写无解释的焦段跳变。",
+      "平台直贴提示词不写时长和画幅；这些参数由用户在视频平台界面选择。",
+      "整片合并提示词必须用固定前置区。若提供角色设定和场景图：主体:@对应的角色设定图；场景:@对应的场景图；音乐:不要生成任何背景音乐和旋律，只需要生成场景及动作对应的音效。若未提供：主体:Codex 生成角色设定描述；场景:Codex 生成场景描述；音乐同上。",
+      "整片合并提示词必须按顺序逐个覆盖所有 Shot，并为每个 Shot 写清环境/构图、主体动作、镜头运动和可见运动变化，不能只列镜头名称。",
+      "保持 session 轻量：JSON/HTML 只记录结构、提示词和本地文件路径，不记录内联图片数据、完整聊天历史或大段生成日志。",
+      "线稿确认后生成合并版提示词；默认按 Shot 顺序处理，不设单镜测试关口。"
+    ]
+  },
+  "video_test": {
+    "status": "optional",
+    "shot_selection": "默认不指定优先镜头；用户需要平台小测时自行选择，或另行要求建议。",
+    "why_this_shot": "无默认优先镜头。",
+    "pass_criteria": [
+      "可选检查项：角色不漂移、透视不漂移、动作不超载、风格一致。"
+    ],
+    "next_action": "线稿确认和合并版提示词完成后即可交付；平台小测不是默认流程关口，AI 不默认审核测试结果。"
+  },
+  "aggregate_video_prompt": "",
+  "storyboard_sheet": {
+    "label": "Final Frame Storyboard Sheet",
+    "path": "",
+    "note": "默认隐藏。只有用户要求提供风格参考并生成对应画面时，才生成一张 3 列最终画面 JPG。"
+  },
+  "next_action": "下一步：补入故事想法、角色设定图和场景图，生成脚本包与线稿提示词。"
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Storyboard Line-Art Generator"
+  short_description: "Generate and register approved storyboard line art"
+  default_prompt: "Use $storyboard-lineart-generator to generate and register line art for this approved session."

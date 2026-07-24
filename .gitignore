@@ -1,0 +1,17 @@
+sessions/*
+!sessions/.gitkeep
+dist/
+.DS_Store
+**/.DS_Store
+__pycache__/
+*.pyc
+*.zip
+**/.storyboard-session.lock
+
+# Local development notes and old delivery artifacts are kept out of the share repo.
+deliverables/
+brief.md
+*-retrospective.md
+skill-architecture-plan.md
+skill-test-entry.md
+video-prompt-research.md

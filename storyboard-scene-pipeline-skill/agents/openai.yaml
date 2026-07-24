@@ -1,0 +1,4 @@
+interface:
+  display_name: "Storyboard Director"
+  short_description: "Plan, draw, and package storyboard sessions"
+  default_prompt: "Use $storyboard-director to turn my brief into a storyboard, line-art review board, and aggregate video prompt."

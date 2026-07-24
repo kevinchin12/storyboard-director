@@ -1,0 +1,4 @@
+interface:
+  display_name: "Storyboard Final Frames"
+  short_description: "Generate optional styled frames from approved line art"
+  default_prompt: "Use $storyboard-final-frame-optional to generate finished frames from the approved line art and style lock."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Storyboard Aggregate Prompt"
+  short_description: "Write the ordered whole-sequence video prompt"
+  default_prompt: "Use $storyboard-aggregate-prompt to write the ordered aggregate video prompt for this confirmed storyboard."
