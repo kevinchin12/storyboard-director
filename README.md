@@ -4,8 +4,6 @@
 
 它可以把故事想法整理成完整的分镜脚本，生成逐镜线稿，并将分镜文字、参考图、线稿和提示词汇总到一个本地 HTML 页面中。线稿确认后，它还会生成一份按镜头顺序编排的视频提示词。
 
-图片只保存为本地文件，`session.json` 和 HTML 只记录路径，不会反复把整批图片塞回对话。这可以减少上下文膨胀，也方便长项目通过 Session 路径继续工作。
-
 ## 它能做什么
 
 - 根据故事想法规划完整分镜
@@ -167,6 +165,32 @@ assets/storyboard-final-3col.jpg
 - `storyboard-final-frame-optional`：只运行最终画面分支
 
 所有阶段都围绕同一个 `session.json`、`session.html` 和 `assets/` 工作。
+
+## 真实案例
+
+仓库保留两套使用 Storyboard Director 完整制作的实际案例：
+
+### 猫猫的房间大冒险
+
+路径：`examples/character/mibu-bedroom-adventure`
+
+8 镜人物故事，展示角色设定图与环境风格图如何分工，以及单一卧室中的连续追逐、逐镜线稿、最终画面和最终画面合集。
+
+### 从草图到机甲手机壳
+
+路径：`examples/subject/sketch-to-mech-phone-case`
+
+8 镜产品视频，展示多张产品结构参考如何锁定产品身份，并完成二维草图转三维实物、细节展示、部件拆解组装、逐镜线稿、最终画面和最终画面合集。
+
+每个案例都包含：
+
+- `session.json`
+- `session.html`
+- 用户参考图
+- 8 张逐镜线稿
+- 8 张逐镜最终画面
+- 最终画面分镜集合图
+- 按 Shot 顺序编写的视频提示词
 
 ## 安装
 

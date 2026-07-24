@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>猫猫的房间大冒险 - Storyboard</title>
+  <style>
+    :root {
+      --bg: #f5f5f7;
+      --bg-soft: #f2f3f5;
+      --panel: #ffffff;
+      --panel-strong: #f6f6f8;
+      --ink: #1d1d1f;
+      --muted: #5f6368;
+      --faint: #8a8f98;
+      --line: rgba(29, 29, 31, 0.09);
+      --line-strong: rgba(29, 29, 31, 0.16);
+      --accent: #0071e3;
+      --accent-soft: #eef6ff;
+      --accent-gradient: linear-gradient(100deg, #0066cc 0%, #00a3ff 100%);
+      --shadow: 0 12px 34px rgba(0, 0, 0, 0.06);
+      --radius: 8px;
+      --font-display: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC", "Noto Sans SC", Arial, sans-serif;
+      --font-body: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC", "Noto Sans SC", Arial, sans-serif;
+      --font-mono: "SFMono-Regular", "JetBrains Mono", "IBM Plex Mono", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    .page {
+      width: min(1500px, calc(100vw - 40px));
+      margin: 30px auto 72px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    .panel {
+      min-width: 0;
+      background: var(--panel);
+      border: 1px solid rgba(29, 29, 31, 0.06);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    section {
+      padding: 26px;
+    }
+
+    h1, h2, h3, p {
+      margin: 0;
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: 48px;
+      font-weight: 650;
+      letter-spacing: 0;
+      line-height: 1.16;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    h2 {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 650;
+      letter-spacing: 0;
+      line-height: 1.3;
+      margin-bottom: 18px;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .eyebrow {
+      font-family: var(--font-body);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink);
+      margin-bottom: 12px;
+    }
+
+    .header-grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.8fr);
+      align-items: stretch;
+    }
+
+    .card {
+      padding: 18px;
+      border-radius: var(--radius);
+      border: 0;
+      background: var(--panel-strong);
+    }
+
+    .summary-card {
+      min-height: 100%;
+      display: grid;
+      align-content: center;
+      gap: 8px;
+    }
+
+    .body-text,
+    .meta-value {
+      color: var(--muted);
+      line-height: 1.68;
+      font-size: 14px;
+    }
+
+    .body-text ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .body-text li + li {
+      margin-top: 5px;
+    }
+
+    .credit {
+      margin-top: 10px;
+      color: var(--faint);
+      font-size: 13px;
+      font-family: var(--font-body);
+      letter-spacing: 0.04em;
+      line-height: 1.4;
+    }
+
+    .delivery-grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .delivery-card {
+      padding: 16px;
+      border-radius: var(--radius);
+      border: 0;
+      background: var(--panel-strong);
+    }
+
+    .readiness-table {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--panel-strong);
+    }
+
+    .readiness-row {
+      display: grid;
+      grid-template-columns: 1.1fr 0.7fr 0.8fr 1fr 1.5fr;
+      gap: 10px;
+      padding: 11px 14px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .readiness-row-no-duration {
+      grid-template-columns: 1.1fr 0.8fr 1fr 1.5fr;
+    }
+
+    .readiness-row:first-child {
+      border-top: 0;
+    }
+
+    .readiness-head {
+      color: var(--faint);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      background: var(--accent-soft);
+      font-size: 10px;
+    }
+
+    .readiness-shot {
+      color: var(--ink);
+      font-weight: 700;
+    }
+
+    .storyboard-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .overview-section {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    .overview-subhead {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 14px;
+      padding-bottom: 10px;
+      border-bottom: 0;
+    }
+
+    .overview-subtitle {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 650;
+      color: var(--ink);
+    }
+
+    .overview-grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .overview-card {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+      border-radius: var(--radius);
+      border: 0;
+      background: var(--panel-strong);
+      box-shadow: none;
+      content-visibility: auto;
+      contain-intrinsic-block-size: 420px;
+    }
+
+    .overview-shot {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .overview-id {
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 650;
+      letter-spacing: 0;
+      color: var(--ink);
+    }
+
+    .overview-duration {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    .overview-duration::before {
+      content: "/";
+      margin-right: 10px;
+      color: var(--faint);
+    }
+
+    .overview-label {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .overview-frame {
+      aspect-ratio: 16 / 9;
+      border-radius: var(--radius);
+      border: 0;
+      background: var(--bg-soft);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      color: var(--muted);
+      text-align: center;
+      padding: 10px;
+    }
+
+    .overview-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+      display: block;
+    }
+
+    .aggregate-prompt-card {
+      display: grid;
+      gap: 14px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .aggregate-prompt-card.has-sheet {
+      grid-template-columns: minmax(320px, 4fr) minmax(0, 5fr);
+      align-items: stretch;
+    }
+
+    .aggregate-sheet-area {
+      display: grid;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .aggregate-sheet-frame {
+      aspect-ratio: 4 / 3;
+      border-radius: var(--radius);
+      border: 0;
+      background: var(--panel-strong);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+
+    .aggregate-sheet-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+    }
+
+    .aggregate-prompt-area {
+      display: grid;
+      min-width: 0;
+    }
+
+    .aggregate-prompt-copy {
+      min-height: 260px;
+      border: 0;
+      background: var(--panel-strong);
+    }
+
+    .aggregate-prompt-card.has-sheet .aggregate-prompt-copy {
+      height: 100%;
+      min-height: 420px;
+    }
+
+    .method-guide-title {
+      max-width: 760px;
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 650;
+      line-height: 1.28;
+      color: var(--ink);
+    }
+
+    .method-guide-definition {
+      max-width: 920px;
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: var(--radius);
+      background: var(--panel-strong);
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .method-list {
+      --method-columns: 56px minmax(220px, 0.65fr) minmax(0, 1.35fr) minmax(260px, 1fr);
+      margin-top: 22px;
+      border-top: 3px solid var(--accent);
+    }
+
+    .method-head {
+      display: grid;
+      grid-template-columns: var(--method-columns);
+      gap: 18px;
+      padding: 12px 0 10px;
+      border-bottom: 1px solid var(--line);
+      color: var(--faint);
+      font-size: 11px;
+      font-weight: 650;
+      line-height: 1.4;
+    }
+
+    .method-row {
+      display: grid;
+      grid-template-columns: var(--method-columns);
+      gap: 18px;
+      align-items: start;
+      padding: 22px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .method-head > :last-child,
+    .method-row > .method-inputs {
+      padding-left: 70px;
+    }
+
+    .method-index {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 500;
+      line-height: 1.2;
+      color: var(--accent);
+    }
+
+    .method-name {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 650;
+      line-height: 1.45;
+      color: var(--ink);
+    }
+
+    .method-description {
+      max-width: 820px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.75;
+    }
+
+    .method-inputs {
+      display: flex;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .method-input {
+      padding: 5px 8px;
+      border-radius: 6px;
+      background: var(--accent-soft);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    .method-footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: baseline;
+      padding-top: 18px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .method-footer strong {
+      color: var(--ink);
+    }
+
+    .method-footer-rule {
+      flex: 0 0 auto;
+      color: var(--faint);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+    }
+
+    .storyboard-sheet-card {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      border-radius: var(--radius);
+      border: 0;
+      background: var(--panel-strong);
+    }
+
+    .storyboard-sheet-frame {
+      border-radius: var(--radius);
+      border: 0;
+      background: var(--bg-soft);
+      overflow: hidden;
+    }
+
+    .storyboard-sheet-frame img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .shot-board {
+      padding: 14px;
+      border-radius: var(--radius);
+      border: 0;
+      background: var(--panel);
+      display: grid;
+      gap: 12px;
+      overflow: visible;
+      content-visibility: auto;
+      contain-intrinsic-block-size: 760px;
+    }
+
+    .shot-board + .shot-board {
+      border-top: 1px solid var(--line);
+      border-radius: 0;
+      padding-top: 26px;
+    }
+
+    .shot-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      padding: 0 2px 2px;
+      border-bottom: 0;
+      background: var(--panel);
+    }
+
+    .shot-title {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .shot-id {
+      font-family: var(--font-display);
+      font-size: 19px;
+      font-weight: 650;
+      letter-spacing: 0;
+      color: var(--ink);
+    }
+
+    .shot-duration {
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 500;
+      letter-spacing: 0;
+      color: var(--muted);
+    }
+
+    .duration-note {
+      font-family: var(--font-body);
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      color: var(--faint);
+      margin-left: 6px;
+    }
+
+    .shot-duration::before {
+      content: "/";
+      margin-right: 12px;
+      color: var(--faint);
+    }
+
+    .shot-layout {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: minmax(0, 1.05fr) minmax(390px, 0.95fr);
+      align-items: stretch;
+    }
+
+    .asset-grid {
+      display: grid;
+      gap: 0;
+      grid-template-columns: 1fr;
+      grid-auto-rows: minmax(0, 1fr);
+      background: var(--panel);
+      border-right: 0;
+      align-self: stretch;
+    }
+
+    .reference-layout {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .reference-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .text-review-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .review-card {
+      display: grid;
+      gap: 10px;
+    }
+
+    .review-status {
+      display: inline-flex;
+      width: fit-content;
+      padding: 4px 8px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: var(--accent-soft);
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .asset-card {
+      display: grid;
+      gap: 12px;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      min-height: 0;
+      padding: 14px;
+      border-radius: var(--radius);
+      background: var(--panel-strong);
+    }
+
+    .asset-label {
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .asset-frame {
+      border-radius: var(--radius);
+      border: 0;
+      background: var(--panel);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      color: var(--muted);
+      text-align: center;
+      padding: 0;
+      min-height: 220px;
+      height: 100%;
+    }
+
+    .asset-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+      display: block;
+    }
+
+    .asset-link {
+      display: none;
+      font-size: 12px;
+      color: var(--accent);
+      word-break: break-all;
+      text-decoration: none;
+      opacity: 0.74;
+    }
+
+    .info-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-rows: auto auto auto minmax(0, 1fr);
+      align-self: stretch;
+    }
+
+    .info-card {
+      padding: 14px 16px;
+      border-radius: var(--radius);
+      border: 0;
+      background: var(--panel-strong);
+    }
+
+    .info-card:has(.video-prompt) {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      min-height: 0;
+    }
+
+    .info-label {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--faint);
+      margin-bottom: 7px;
+    }
+
+    .info-value {
+      color: var(--ink);
+      line-height: 1.78;
+      font-size: 14px;
+    }
+
+    .video-prompt {
+      display: grid;
+      grid-template-rows: minmax(0, 1fr);
+      gap: 10px;
+      font-size: 13px;
+      min-height: 0;
+      height: 100%;
+    }
+
+    .prompt-block {
+      padding: 0;
+      border-radius: var(--radius);
+      background: transparent;
+      border: 0;
+      min-height: 0;
+      height: 100%;
+    }
+
+    .prompt-copy {
+      display: block;
+      width: 100%;
+      min-height: 118px;
+      height: 100%;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      color: var(--ink);
+      padding: 12px 13px;
+      font: 13px/1.65 var(--font-body);
+      white-space: pre-wrap;
+    }
+
+    .empty {
+      padding: 16px;
+      border-radius: var(--radius);
+      border: 1px dashed var(--line-strong);
+      color: var(--muted);
+      background: var(--bg-soft);
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      background: var(--accent-soft);
+      padding: 2px 6px;
+      border-radius: var(--radius);
+    }
+
+    @media (max-width: 1100px) {
+      .header-grid,
+      .shot-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .asset-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: none;
+        border-right: 0;
+      }
+
+      .delivery-grid,
+      .reference-layout,
+      .text-review-grid,
+      .overview-grid,
+      .aggregate-prompt-card.has-sheet,
+      .readiness-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 1080px) {
+      .method-row {
+        grid-template-columns: 48px minmax(0, 1fr);
+        gap: 12px 14px;
+        padding: 18px 0;
+      }
+
+      .method-head {
+        display: none;
+      }
+
+      .method-index {
+        font-size: 21px;
+      }
+
+      .method-name,
+      .method-description,
+      .method-inputs {
+        grid-column: 2;
+      }
+
+      .method-inputs::before {
+        width: 100%;
+        margin-bottom: 2px;
+        color: var(--faint);
+        content: "建议输入";
+        font-size: 11px;
+        font-weight: 650;
+        line-height: 1.4;
+      }
+
+      .method-row > .method-inputs {
+        padding-left: 0;
+      }
+    }
+
+    @media (max-width: 980px) {
+      .page {
+        width: min(calc(100vw - 24px), 1480px);
+        margin: 12px auto 40px;
+      }
+
+      section {
+        padding: 18px;
+      }
+
+      h1 {
+        font-size: 34px;
+      }
+
+      .credit {
+        font-size: 12px;
+      }
+
+      .method-guide-title {
+        font-size: 24px;
+      }
+
+      .method-footer {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="panel">
+      <div class="header-grid">
+        <div>
+          <div class="eyebrow">Storyboard</div>
+          <h1>猫猫的房间大冒险</h1>
+          <div class="credit">Mibu&#x27;s Great Bedroom Adventure</div>
+        </div>
+        <div class="card summary-card">
+          <div class="eyebrow">Brief</div>
+          <div class="body-text">暖阳卧室里，英短蓝白猫咪布被一颗从床底滚出的毛线球吸引。一次追逐和意外碰撞让他蜷成猫猫圆球，穿过椅腿、撞散拖鞋、冲上软垫并飞进衣物收纳篮，最终抱住迟一步落到头顶的毛线球，满足地缩进衣服里。</div>
+          <div class="meta-value">画面比例：16:9</div>
+          <div class="meta-value">最后更新：2026-07-24 20:49</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>故事摘要</h2>
+      <div class="card">
+        <div class="body-text">阳光照进卧室，咪布趴在地毯上，盯住从床底滚出来的一颗芥末黄色毛线球。毛线球向房间右侧滚去，咪布立刻追赶，却用肩侧擦撞床脚；他下意识抱住尾巴、收紧四肢，蜷成圆滚滚的猫球，借着惯性继续向右滚。猫球穿过椅腿、撞开拖鞋，追着前方的毛线球滚上斜靠在窗边休憩榻边缘的厚软垫。软垫回弹让毛线球走一条更高、更慢的弧线，猫球则先落进装满浅色衣物的编织收纳篮。咪布晕乎乎地冒出脑袋，毛线球随后恰好落到头顶；他用前爪接住毛线球，满足地抱着它缩回衣物中。</div>
+      </div>
+    </section>
+
+
+      <section class="panel">
+        <h2>角色设定与场景图</h2>
+        <div class="reference-layout">
+          <div>
+            <div class="overview-subhead"><div class="overview-subtitle">角色设定图</div></div>
+            <div style="height: 12px;"></div>
+            <div class="reference-grid"><article class="asset-card"><div class="asset-label">咪布角色设定图</div><div class="asset-frame"><img src="assets/reference-character-mibu.png" alt="咪布角色设定图" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/reference-character-mibu.png">assets/reference-character-mibu.png</a><div class="meta-value">锁定 2 岁英短蓝白公猫咪布：矮壮圆润、圆脸饱满腮部、大琥珀眼、粉鼻、灰蓝头背尾、白色口鼻胸腹与四爪，以及粉色 × 薄荷绿条纹蝴蝶结；不锁构图、镜头或动作。</div></article></div>
+          </div>
+          <div>
+            <div class="overview-subhead"><div class="overview-subtitle">场景图</div></div>
+            <div style="height: 12px;"></div>
+            <div class="reference-grid"><article class="asset-card"><div class="asset-label">暖阳居家风格参考（非场景布局）</div><div class="asset-frame"><img src="assets/reference-style-warm-sunlight.png" alt="暖阳居家风格参考（非场景布局）" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/reference-style-warm-sunlight.png">assets/reference-style-warm-sunlight.png</a><div class="meta-value">只借用暖杏色、浅木、奶油织物、自然绿植和大面积温暖斜射日光的气质；这不是场景图，不复制原图客厅、挑高窗、茶几、沙发或植物布局，卧室空间必须重新设计。</div></article></div>
+          </div>
+        </div>
+      </section>
+
+
+
+
+    <section class="panel">
+      <h2>故事板</h2>
+      <div class="storyboard-list">
+
+            <article class="shot-board">
+              <div class="shot-head">
+                <div class="shot-title">
+                  <span class="shot-id">Shot 01</span>
+
+                </div>
+              </div>
+              <div class="shot-layout">
+                <div class="asset-grid">
+                  <div class="asset-card">
+                    <div class="asset-label">Line Art</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot01-line.jpg" alt="Shot 01 Line Draft" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot01-line.jpg">assets/shot01-line.jpg</a></div>
+                  </div>
+
+                  <div class="asset-card">
+                    <div class="asset-label">Frame</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot01-final.jpg" alt="Shot 01 Final" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot01-final.jpg">assets/shot01-final.jpg</a></div>
+                  </div>
+
+                </div>
+                <div class="info-grid">
+                  <div class="info-card">
+                    <span class="info-label">画面</span>
+                    <div class="info-value">猫眼高度三分之四宽景；浅木低床位于左后，燕麦色大地毯横贯中景，咪布趴在左前景并面向右侧。浅木椅、奶油拖鞋、软垫坡道和右侧休憩榻上的编织篮依次在深景中可读，左后窗外的阳光方向明确。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">镜头</span>
+                    <div class="info-value">35mm 猫眼高度宽景，沿房间轴线做缓慢短推，不横移；始终保留床、路线和右侧篮子的地理关系。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">动作</span>
+                    <div class="info-value">起点：咪布懒洋洋趴着，视线停在床底阴影。过程：唯一的芥末黄色毛线球从床底滚出并向右移动，咪布的眼睛与脑袋连续跟随。落点：毛线球仍向右滚，咪布压低前身、后腿收紧进入蓄势姿态。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">视频提示词</span>
+                    <div class="info-value video-prompt"><div class="prompt-block"><textarea class="prompt-copy" readonly>原创暖阳卧室的猫眼高度三分之四宽景：浅木低床在左后，燕麦色大地毯延伸向右，中央依次能看见浅木椅、奶油拖鞋、斜靠休憩榻的厚软垫和榻上的编织衣物篮。两岁英短蓝白公猫咪布矮壮圆润，圆脸、琥珀眼、粉鼻、白色口鼻胸腹四爪、灰蓝头背尾，胸前戴粉色与薄荷绿条纹蝴蝶结；他趴在左前景。唯一的芥末黄色毛线球从床底滚出并继续向右，咪布的眼睛和脑袋随球转动，最后压低前身、收紧后腿蓄势。摄影机在房间入口侧用 35mm 猫眼高度缓慢短推，床左篮右和左后方自然光方向不变。禁止额外猫、额外毛线球、人类、文字、箭头和复制参考图客厅布局。</textarea></div></div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="shot-board">
+              <div class="shot-head">
+                <div class="shot-title">
+                  <span class="shot-id">Shot 02</span>
+
+                </div>
+              </div>
+              <div class="shot-layout">
+                <div class="asset-grid">
+                  <div class="asset-card">
+                    <div class="asset-label">Line Art</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot02-line.jpg" alt="Shot 02 Line Draft" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot02-line.jpg">assets/shot02-line.jpg</a></div>
+                  </div>
+
+                  <div class="asset-card">
+                    <div class="asset-label">Frame</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot02-final.jpg" alt="Shot 02 Final" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot02-final.jpg">assets/shot02-final.jpg</a></div>
+                  </div>
+
+                </div>
+                <div class="info-grid">
+                  <div class="info-card">
+                    <span class="info-label">画面</span>
+                    <div class="info-value">地毯高度的侧面中宽景，床沿形成上方水平线，咪布在画面左侧，毛线球在右侧领先约一个猫身；床尾右侧床脚位于前进路线的右前方。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">镜头</span>
+                    <div class="info-value">50mm 地毯高度向右侧移跟拍，与咪布近似同速，始终让球在前、咪布在后、床脚在路径上可读。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">动作</span>
+                    <div class="info-value">起点：咪布处于蓄势姿态，毛线球继续右滚。过程：咪布蹬地加速沿床边追赶，毛线球从床脚外侧绕过，咪布盯着球走更靠内的路线。落点：球已越过床脚，咪布冲向床脚且来不及避让。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">视频提示词</span>
+                    <div class="info-value video-prompt"><div class="prompt-block"><textarea class="prompt-copy" readonly>同一原创暖阳卧室的地毯高度侧面中宽景，浅木低床在上方形成水平边，床尾右侧床脚清楚挡在内侧路线。矮壮圆润的英短蓝白猫咪布从左侧蓄势蹬出，粉色与薄荷绿蝴蝶结随跑动轻摆；唯一的芥末黄色毛线球在右侧领先约一个猫身，先从床脚外侧绕过。咪布只盯着球，沿更贴近床脚的内线加速，结尾肩侧即将碰到床脚。摄影机在房间入口侧以 50mm 地毯高度向右平稳侧移跟拍，球始终在前、猫始终在后。禁止反向运动、球复制、床脚移位、角色换花色、文字或夸张速度旋涡。</textarea></div></div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="shot-board">
+              <div class="shot-head">
+                <div class="shot-title">
+                  <span class="shot-id">Shot 03</span>
+
+                </div>
+              </div>
+              <div class="shot-layout">
+                <div class="asset-grid">
+                  <div class="asset-card">
+                    <div class="asset-label">Line Art</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot03-line.jpg" alt="Shot 03 Line Draft" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot03-line.jpg">assets/shot03-line.jpg</a></div>
+                  </div>
+
+                  <div class="asset-card">
+                    <div class="asset-label">Frame</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot03-final.jpg" alt="Shot 03 Final" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot03-final.jpg">assets/shot03-final.jpg</a></div>
+                  </div>
+
+                </div>
+                <div class="info-grid">
+                  <div class="info-card">
+                    <span class="info-label">画面</span>
+                    <div class="info-value">床尾前方的三分之二中景，床尾右脚固定在画面中左，咪布从左后方沿内线冲入，毛线球已在右前方继续滚走。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">镜头</span>
+                    <div class="info-value">50mm 固定三分之二机位；碰撞发生时做极短物理后拉，不使用画面震动或特效。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">动作</span>
+                    <div class="info-value">起点：咪布肩侧即将擦到床脚。过程：肩侧轻撞后身体因前冲转动，他下意识用前爪抱住尾巴、收拢四肢。落点：咪布蜷成仍带耳朵、爪与领结特征的猫猫圆球，保留向右动量并开始顺时针滚出。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">视频提示词</span>
+                    <div class="info-value video-prompt"><div class="prompt-block"><textarea class="prompt-copy" readonly>同一卧室床尾前方的三分之二中景，浅木床尾右脚固定在画面中左，唯一的芥末黄色毛线球已经越过床脚并继续向右。英短蓝白猫咪布从左后方内线冲入，肩侧轻轻擦撞床脚；前冲动量带动身体转动，他本能地用前爪抱住尾巴、收拢四肢，最后蜷成圆滚滚但仍能辨出灰白分区、耳朵、白爪边缘、尾巴与粉色薄荷绿蝴蝶结的猫猫圆球，保持向右动量开始顺时针滚动。摄影机在同一动作轴南侧用 50mm 固定机位，碰撞时只做极短物理后拉。禁止撞停后凭空启动、变成无特征毛球、与毛线球融合、多余肢体、撞击文字或画面震动。</textarea></div></div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="shot-board">
+              <div class="shot-head">
+                <div class="shot-title">
+                  <span class="shot-id">Shot 04</span>
+
+                </div>
+              </div>
+              <div class="shot-layout">
+                <div class="asset-grid">
+                  <div class="asset-card">
+                    <div class="asset-label">Line Art</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot04-line.jpg" alt="Shot 04 Line Draft" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot04-line.jpg">assets/shot04-line.jpg</a></div>
+                  </div>
+
+                  <div class="asset-card">
+                    <div class="asset-label">Frame</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot04-final.jpg" alt="Shot 04 Final" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot04-final.jpg">assets/shot04-final.jpg</a></div>
+                  </div>
+
+                </div>
+                <div class="info-grid">
+                  <div class="info-card">
+                    <span class="info-label">画面</span>
+                    <div class="info-value">同侧稍高的俯三分之四中宽景，浅木四腿椅居中，椅腿之间的通道清楚，毛线球已在椅子右侧，猫球从左下方滚入；右后景能看到尚未被碰动的奶油拖鞋和软垫下缘。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">镜头</span>
+                    <div class="info-value">35mm 稍高俯三分之四机位，沿动作方向做短幅向右摇移，保持椅子为固定地理锚点。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">动作</span>
+                    <div class="info-value">起点：毛线球先穿过椅腿，猫球从左侧接近。过程：咪布保持顺时针旋转，从两条椅腿之间的宽通道滚过。落点：猫球完整穿出椅子右侧，前方正对并排拖鞋，椅子保持原位。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">视频提示词</span>
+                    <div class="info-value video-prompt"><div class="prompt-block"><textarea class="prompt-copy" readonly>同一原创卧室的稍高俯三分之四中宽景，一把浅木四腿椅居中，椅腿之间有足够猫球通过的宽通道；唯一的芥末黄色毛线球已经先到椅子右侧，后方还能看见并排未动的奶油拖鞋和软垫坡道下缘。仍可辨出灰白分区、耳朵、白爪、尾巴和粉色薄荷绿蝴蝶结的咪布猫球从左下方顺时针滚入，沿同一条左向右路线完整穿过两条椅腿，最后滚出椅子右侧正对拖鞋。摄影机在入口侧稍高位置短幅向右摇移，让椅子保持固定地理锚点。禁止碰撞椅腿、跨轴、旋转反向、猫球失去身份、拖鞋提前散开或出现多颗球。</textarea></div></div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="shot-board">
+              <div class="shot-head">
+                <div class="shot-title">
+                  <span class="shot-id">Shot 05</span>
+
+                </div>
+              </div>
+              <div class="shot-layout">
+                <div class="asset-grid">
+                  <div class="asset-card">
+                    <div class="asset-label">Line Art</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot05-line.jpg" alt="Shot 05 Line Draft" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot05-line.jpg">assets/shot05-line.jpg</a></div>
+                  </div>
+
+                  <div class="asset-card">
+                    <div class="asset-label">Frame</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot05-final.jpg" alt="Shot 05 Final" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot05-final.jpg">assets/shot05-final.jpg</a></div>
+                  </div>
+
+                </div>
+                <div class="info-grid">
+                  <div class="info-card">
+                    <span class="info-label">画面</span>
+                    <div class="info-value">入口侧贴地近中景，两只奶油色开口拖鞋并排处于前中景、鞋头朝右，中间窄缝只够毛线球穿过；软垫从右后方地毯斜靠到休憩榻边缘。毛线球在右侧坡道下缘，猫球从左侧逼近拖鞋。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">镜头</span>
+                    <div class="info-value">65mm 贴地侧面机位，先固定看清球穿缝与撞击，再做短幅向右跟随到软垫下缘。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">动作</span>
+                    <div class="info-value">起点：毛线球穿过两只拖鞋的窄缝，猫球紧随。过程：较大的猫球撞中拖鞋，近镜头一只外旋，另一只向右滑动并侧翻。落点：猫球没有停顿，继续向右滚向软垫下缘，散开的拖鞋留在身后。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">视频提示词</span>
+                    <div class="info-value video-prompt"><div class="prompt-block"><textarea class="prompt-copy" readonly>同一卧室入口侧的贴地近中景，一双奶油色开口拖鞋并排位于前中景，鞋头朝右，中间只留够小毛线球通过的窄缝；右后方厚方形软垫由地毯斜搭到低矮窗边休憩榻。唯一的芥末黄色毛线球先穿过拖鞋窄缝到达坡道下缘，仍能辨出灰白花色、耳朵、白爪边缘、尾巴和粉色薄荷绿蝴蝶结的咪布猫球紧随而来，撞中两只拖鞋：近镜头一只外旋约六十度，另一只向右滑动并侧翻。咪布不停止，继续顺时针向右滚向软垫，散开的拖鞋留在原地。摄影机用 65mm 贴地侧面机位看清撞击，再短幅跟到坡道。禁止穿模、拖鞋复制或复位、猫球停住、跨轴、文字与撞击星星。</textarea></div></div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="shot-board">
+              <div class="shot-head">
+                <div class="shot-title">
+                  <span class="shot-id">Shot 06</span>
+
+                </div>
+              </div>
+              <div class="shot-layout">
+                <div class="asset-grid">
+                  <div class="asset-card">
+                    <div class="asset-label">Line Art</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot06-line.jpg" alt="Shot 06 Line Draft" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot06-line.jpg">assets/shot06-line.jpg</a></div>
+                  </div>
+
+                  <div class="asset-card">
+                    <div class="asset-label">Frame</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot06-final.jpg" alt="Shot 06 Final" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot06-final.jpg">assets/shot06-final.jpg</a></div>
+                  </div>
+
+                </div>
+                <div class="info-grid">
+                  <div class="info-card">
+                    <span class="info-label">画面</span>
+                    <div class="info-value">软垫南前方低机位三分之二近景，厚软垫由左下通向右上并搭在休憩榻边，榻右侧编织篮的宽口和浅色衣物可见。毛线球位于坡道上段，猫球从左下坡道底部滚上。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">镜头</span>
+                    <div class="info-value">35mm 低位顺软垫向上短推并小幅上仰，保持两个不同高度的弧线和篮口目标同时可读。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">动作</span>
+                    <div class="info-value">起点：毛线球先滚到软垫上段，猫球压上坡道。过程：软垫被猫球压缩后回弹，毛线球被弹入更高更慢的弧线，猫球沿较低弧线从坡顶腾空。落点：猫球先开始朝篮口下坠，毛线球仍在其上方继续上升或悬于高弧顶点。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">视频提示词</span>
+                    <div class="info-value video-prompt"><div class="prompt-block"><textarea class="prompt-copy" readonly>同一原创卧室右侧的低机位三分之二近景，一只厚方形软垫从左下地毯斜搭到右上低矮休憩榻边，榻右半坐垫上的宽口浅棕编织篮装着浅色衣物。唯一的芥末黄色毛线球先滚到软垫上段，仍保留灰白分区、耳朵、白爪边缘、尾巴和粉色薄荷绿蝴蝶结的咪布猫球从左下压上坡道。软垫局部压缩后回弹，把毛线球送入更高、更慢的弧线，咪布沿较低弧线从坡顶腾空并先朝篮口下坠；结尾毛线球仍在咪布上方。摄影机用 35mm 低位顺坡短推并小幅上仰，让两条不同高度的运动和篮口目标同时清楚。禁止软垫变硬板、球或猫复制、两者融合、篮子移位、跨轴和轨迹箭头。</textarea></div></div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="shot-board">
+              <div class="shot-head">
+                <div class="shot-title">
+                  <span class="shot-id">Shot 07</span>
+
+                </div>
+              </div>
+              <div class="shot-layout">
+                <div class="asset-grid">
+                  <div class="asset-card">
+                    <div class="asset-label">Line Art</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot07-line.jpg" alt="Shot 07 Line Draft" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot07-line.jpg">assets/shot07-line.jpg</a></div>
+                  </div>
+
+                  <div class="asset-card">
+                    <div class="asset-label">Frame</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot07-final.jpg" alt="Shot 07 Final" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot07-final.jpg">assets/shot07-final.jpg</a></div>
+                  </div>
+
+                </div>
+                <div class="info-grid">
+                  <div class="info-card">
+                    <span class="info-label">画面</span>
+                    <div class="info-value">休憩榻正面、略高于篮沿的斜俯中近景，宽口浅棕编织篮直立在右半坐垫，约三分之二装满奶油与浅灰衣物；画面上沿留出毛线球稍后进入的空间。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">镜头</span>
+                    <div class="info-value">50mm 略高于篮沿的固定斜俯机位，落地后做非常轻的下压式推近；不追随画外高处的毛线球。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">动作</span>
+                    <div class="info-value">起点：猫球从画面左上沿较低弧线落向篮口。过程：咪布落进衣物，衣物明显下陷并向篮沿鼓起，篮体保持直立。落点：短暂停顿后，咪布晕乎乎地从中央冒出脑袋和两只前爪，耳朵略歪并定住。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">视频提示词</span>
+                    <div class="info-value video-prompt"><div class="prompt-block"><textarea class="prompt-copy" readonly>同一卧室右侧休憩榻的正面斜俯中近景，一只宽口浅棕编织篮直立在右半坐垫，约三分之二装满奶油和浅灰衣物，篮口上方留有空间。仍带灰白分区、耳朵、白爪边缘、尾巴和粉色薄荷绿蝴蝶结的咪布猫球从画面左上沿较低弧线先落入篮内，衣物明显下陷并向篮沿鼓起，但篮体不倾倒。短暂停顿后，咪布恢复成矮壮圆脸的英短蓝白猫形态，晕乎乎地从衣物中央冒出脑袋和两只前爪，耳朵略歪、琥珀眼发愣并停住；毛线球此时仍在画外上方。摄影机用 50mm 略高于篮沿的固定机位，落地后极轻推近。禁止篮子翻倒、毛线球提前出现、额外肢体、眩晕星星、文字或新角色。</textarea></div></div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="shot-board">
+              <div class="shot-head">
+                <div class="shot-title">
+                  <span class="shot-id">Shot 08</span>
+
+                </div>
+              </div>
+              <div class="shot-layout">
+                <div class="asset-grid">
+                  <div class="asset-card">
+                    <div class="asset-label">Line Art</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot08-line.jpg" alt="Shot 08 Line Draft" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot08-line.jpg">assets/shot08-line.jpg</a></div>
+                  </div>
+
+                  <div class="asset-card">
+                    <div class="asset-label">Frame</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot08-final.jpg" alt="Shot 08 Final" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot08-final.jpg">assets/shot08-final.jpg</a></div>
+                  </div>
+
+                </div>
+                <div class="info-grid">
+                  <div class="info-card">
+                    <span class="info-label">画面</span>
+                    <div class="info-value">收纳篮边缘高度的正面近景，咪布居中从浅色衣物中露出圆脸、胸口、两只前爪和领结；篮口上方留出垂直落球通道，背景为柔焦的暖杏墙面和少量窗边绿植。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">镜头</span>
+                    <div class="info-value">85mm 篮沿高度正面静态近景，随咪布下沉做极慢短推，最后稳定停留一拍。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">动作</span>
+                    <div class="info-value">起点：咪布晕乎乎定住，双爪搭在衣物上。过程：唯一毛线球从正上方落到他头顶，他抬起两只前爪接住并抱到胸前。落点：咪布露出安心满足的表情，抱球缓缓缩回衣物，最后只露出眼睛、耳朵和怀中毛线球。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">视频提示词</span>
+                    <div class="info-value video-prompt"><div class="prompt-block"><textarea class="prompt-copy" readonly>同一收纳篮边缘高度的正面近景，矮壮圆润的英短蓝白猫咪布居中从奶油与浅灰衣物中露出圆脸、胸口、两只前爪和粉色薄荷绿条纹蝴蝶结，灰蓝头背尾与白色口鼻胸腹四爪、琥珀眼和粉鼻保持一致。咪布晕乎乎地定住，唯一的芥末黄色毛线球从正上方垂直落到头顶；他抬起两只前爪把球接到胸前，眼神从发愣变成安心满足，抱着球缓缓缩回衣物，最后只露出眼睛、耳朵和怀中的毛线球。摄影机用 85mm 篮沿高度静态近景，随下沉极慢短推并停留一拍。禁止出现第二颗球、球同时在头顶与爪中、多余肢体、爱心星星、文字、片尾卡或篮子移位。</textarea></div></div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>分镜总览</h2>
+
+      <div class="overview-section">
+        <div>
+        <div class="overview-subhead">
+            <div class="overview-subtitle">线稿总览</div>
+          </div>
+          <div style="height: 12px;"></div>
+          <div class="overview-grid">
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 01</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot01-line.jpg" alt="Shot 01 Line Draft" loading="lazy" decoding="async" /></div>
+            </article>
+
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 02</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot02-line.jpg" alt="Shot 02 Line Draft" loading="lazy" decoding="async" /></div>
+            </article>
+
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 03</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot03-line.jpg" alt="Shot 03 Line Draft" loading="lazy" decoding="async" /></div>
+            </article>
+
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 04</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot04-line.jpg" alt="Shot 04 Line Draft" loading="lazy" decoding="async" /></div>
+            </article>
+
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 05</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot05-line.jpg" alt="Shot 05 Line Draft" loading="lazy" decoding="async" /></div>
+            </article>
+
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 06</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot06-line.jpg" alt="Shot 06 Line Draft" loading="lazy" decoding="async" /></div>
+            </article>
+
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 07</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot07-line.jpg" alt="Shot 07 Line Draft" loading="lazy" decoding="async" /></div>
+            </article>
+
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 08</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot08-line.jpg" alt="Shot 08 Line Draft" loading="lazy" decoding="async" /></div>
+            </article>
+            </div>
+        </div>
+
+        <div>
+          <div class="overview-subhead">
+            <div class="overview-subtitle">画面总览</div>
+          </div>
+          <div style="height: 12px;"></div>
+          <div class="overview-grid">
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 01</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot01-final.jpg" alt="Shot 01 Final" loading="lazy" decoding="async" /></div>
+            </article>
+
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 02</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot02-final.jpg" alt="Shot 02 Final" loading="lazy" decoding="async" /></div>
+            </article>
+
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 03</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot03-final.jpg" alt="Shot 03 Final" loading="lazy" decoding="async" /></div>
+            </article>
+
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 04</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot04-final.jpg" alt="Shot 04 Final" loading="lazy" decoding="async" /></div>
+            </article>
+
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 05</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot05-final.jpg" alt="Shot 05 Final" loading="lazy" decoding="async" /></div>
+            </article>
+
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 06</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot06-final.jpg" alt="Shot 06 Final" loading="lazy" decoding="async" /></div>
+            </article>
+
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 07</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot07-final.jpg" alt="Shot 07 Final" loading="lazy" decoding="async" /></div>
+            </article>
+
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 08</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot08-final.jpg" alt="Shot 08 Final" loading="lazy" decoding="async" /></div>
+            </article>
+            </div>
+        </div>
+
+      </div>
+
+    </section>
+
+
+        <section class="panel">
+          <h2>整片生成提示词</h2>
+          <div class="aggregate-prompt-card has-sheet">
+
+      <div class="aggregate-sheet-area">
+        <div class="overview-label">Final Frame Storyboard Sheet</div>
+        <a class="aggregate-sheet-frame" href="assets/storyboard-final-3col.jpg" download>
+          <img src="assets/storyboard-final-3col.jpg" alt="Final Frame Storyboard Sheet" loading="lazy" decoding="async" />
+        </a>
+      </div>
+    <div class="aggregate-prompt-area"><div class="prompt-block"><textarea class="prompt-copy aggregate-prompt-copy" readonly>主体:@对应的角色设定图
+场景:@对应的场景图
+音乐:不要生成任何背景音乐和旋律，只需要生成场景及动作对应的音效
+
+场景参考职责：只锁定暖杏色墙面、蜂蜜色浅木、奶油与燕麦棉麻织物、少量自然绿植和温暖晨光；不得复制参考图中的客厅、挑高窗、茶几、沙发或植物布局。实际场景是重新设计的原创卧室。
+
+Shot 01 | 诱因建立：原创卧室的猫眼高度三分之四宽景，浅木低床位于左后，燕麦色大地毯向右铺开，浅木椅、奶油拖鞋、软垫坡道和右侧休憩榻上的编织衣物篮沿追逐路线依次可见；咪布懒洋洋趴在左前景，身体朝右，目光停在床底阴影。唯一的芥末黄色毛线球从床底滚出并向右移动，咪布的琥珀眼和脑袋连续跟随，随后压低前身、收紧后腿，落在蓄势待发的姿态，毛线球仍在前方继续滚动。Camera: 摄影机保持在房间入口侧，以猫眼高度沿房间轴线缓慢短推，不横移，始终保留床左、篮右和完整路线。可见变化与落点：毛线球由床底进入明处并拉开距离，咪布由松弛趴卧转为压低蓄势；左后上方晨光方向、角色花色、领结和唯一毛线球保持稳定。音效只保留毛线轻擦地毯、细微项圈声和安静室内环境声。
+
+Shot 02 | 沿床追逐：同一卧室的地毯高度侧面中宽景，床沿形成上方水平线，床尾右脚清楚位于内侧路线前方；咪布从左侧蓄势起跑，唯一的毛线球在右侧领先约一个猫身。咪布蹬地沿床边向右加速，视线始终锁住毛线球；毛线球从床脚外侧绕过，咪布走更贴近床脚的内线，最终冲到床脚前、肩侧已来不及完全避让，毛线球则越过床脚继续领先。Camera: 摄影机在入口侧贴近地毯向右平稳侧移，与咪布近似同速，始终保持球在前、猫在后、床脚处于路径上。可见变化与落点：咪布由蓄势转为高速前冲，蝴蝶结仅轻微摆动；运动轴继续左向右，床脚、角色身份和球的数量不得变化。音效只保留短促蹬地声、爪垫擦过地毯声和毛线滚动声。
+
+Shot 03 | 擦撞蜷缩：同一床尾前方的三分之二中景，浅木床尾右脚固定在画面中左，咪布从左后方沿内线冲入，唯一的毛线球已在右前方继续滚走。咪布肩侧轻擦床脚，前冲动量带动身体转动；他下意识以前爪抱住尾巴并收拢四肢，最终蜷成圆滚滚的猫球，仍能辨认灰蓝与白色花区、双耳、白爪边缘、尾巴和粉色与薄荷绿条纹蝴蝶结，并保留向右动量开始顺时针滚动。Camera: 摄影机固定在动作轴入口侧，碰撞瞬间只做极短物理后拉，不震屏、不越轴。可见变化与落点：咪布由奔跑姿态连续压缩成可辨识的猫球，并开始顺时针向右滚出；毛线球始终领先，床脚不移位。音效只保留轻微碰撞声、毛发与地毯摩擦声和咪布短促受惊叫声。
+
+Shot 04 | 穿越椅腿：同一卧室稍高俯看的三分之四中宽景，浅木四腿椅居中，椅腿之间的通道清晰；唯一的毛线球已经到达椅子右侧，咪布猫球从左下方接近，右后景能看见仍并排未动的奶油拖鞋与软垫下缘。咪布保持顺时针旋转，从两条椅腿之间沿左向右路线完整滚过，最终从椅子右侧穿出并正对前方拖鞋，椅子没有被碰动。Camera: 摄影机保持在入口侧稍高位置，沿动作方向做短幅向右摇移，同时让椅子成为固定地理锚点。可见变化与落点：猫球从椅子左侧转移到右侧，滚动方向和身份特征不变；拖鞋必须仍处于并排初始状态，毛线球继续在前。音效只保留连续滚动摩擦声、轻微领结抖动声和从椅腿间掠过的空气声。
+
+Shot 05 | 撞散拖鞋：入口侧贴地近中景，两只奶油色开口拖鞋并排位于前中景、鞋头朝右，中间窄缝只够小毛线球通过；厚方形软垫从右后方地毯斜搭至低矮休憩榻边。唯一的毛线球先穿过拖鞋窄缝到达坡道下缘，咪布猫球紧随其后撞中拖鞋；近镜头一只拖鞋外旋约六十度，另一只向右滑动并侧翻，咪布不停顿地继续顺时针滚向软垫下缘，散开的拖鞋留在身后。Camera: 摄影机先以贴地侧面固定机位看清毛线球穿缝和猫球撞击，再短幅向右跟随至坡道。可见变化与落点：拖鞋由整齐并排变为一只外旋、一只侧翻滑开，咪布落在坡道下缘附近并继续向右；拖鞋之后不得复位，毛线球仍保持领先。音效只保留毛线穿缝声、拖鞋受撞后的软质滑动与翻倒声、猫球滚动声。
+
+Shot 06 | 软垫起跳：同一卧室右侧的低机位三分之二近景，厚软垫从左下地毯斜搭至右上休憩榻边，榻右半坐垫上的宽口浅棕编织篮装着浅色衣物；散开的拖鞋可留在左后景。唯一的毛线球先滚到软垫上段，咪布猫球从左下压上坡道；软垫在猫球重量下局部压缩后回弹，将毛线球送入更高、更慢的弧线，同时咪布沿较低弧线从坡顶腾空，最终先朝篮口下坠，毛线球仍在其上方继续上升或停留在高弧顶点。Camera: 摄影机从入口侧低位顺软垫短推并小幅上仰，让两条不同高度的运动弧线和篮口落点同时清楚。可见变化与落点：软垫留下局部凹痕但仍稳固搭住榻沿，咪布由滚动转为较低飞行弧线并先下坠，毛线球进入更高更慢的弧线；两者不得融合或复制。音效只保留软垫压缩回弹声、短促惊叫、空气掠过声和远处衣物轻响。
+
+Shot 07 | 落入衣物篮：同一休憩榻的正面斜俯中近景，宽口浅棕编织篮直立在右半坐垫，约三分之二装满奶油与浅灰衣物，篮口上方保留空白空间；咪布猫球从画面左上沿较低弧线朝篮口落下，毛线球仍位于画外上方。咪布落入衣物，衣物明显下陷并向篮沿鼓起，篮体始终直立；短暂停顿后，他恢复为矮壮圆脸的英短蓝白猫形态，从衣物中央晕乎乎地冒出脑袋和两只前爪，耳朵略歪、琥珀眼发愣并定住。Camera: 摄影机略高于篮沿固定斜俯，落地后只做非常轻的下压式推近，不追随画外高处的毛线球。可见变化与落点：衣物由蓬松变为受压下陷，咪布由猫球恢复并以脑袋和双爪露出篮口；篮子不倾倒，毛线球不得提前进入篮内或咪布爪中。音效只保留柔软扑落声、篮身轻响、衣物挤压声和咪布短促晕眩呼气。
+
+Shot 08 | 抱球收尾：同一收纳篮边缘高度的正面近景，咪布居中从已下陷的奶油与浅灰衣物中露出圆脸、胸口、两只前爪和胸前蝴蝶结，篮口上方留出垂直落球通道，背景只保留柔焦的暖杏墙面与少量窗边绿植。咪布晕乎乎地定住，双爪搭在衣物上；唯一的毛线球从正上方垂直落到他的头顶，他抬起两只前爪将球接到胸前，眼神由发愣变得安心满足，随后抱着球缓缓缩回衣物，最终只露出眼睛、耳朵和怀中的毛线球。Camera: 摄影机保持篮沿高度的正面静态近景，随咪布下沉做极慢短推，最后稳定停留。可见变化与落点：毛线球完成从头顶到双爪之间再到胸前的唯一连续转移，咪布以满足抱球的姿态缩入衣物；球不得在头顶和爪中同时出现，篮子与衣物状态保持承接。音效只保留毛线球轻落声、前爪抱球时的细碎衣物声和满足的呼噜声。
+
+Global continuity: 咪布始终是同一只两岁英短蓝白公猫，矮壮圆润、短腿、圆脸、大琥珀眼、粉鼻、灰蓝头背尾、白色口鼻胸腹与四爪，全程佩戴粉色与薄荷绿条纹蝴蝶结和细深色项圈；不得长毛化、尖脸化、变瘦、换花色、换眼色、丢失或换色领结。场景始终是原创卧室：浅木低床在左，燕麦色大地毯和四腿浅木椅居中，奶油拖鞋、软垫坡道、右侧低矮木框休憩榻及榻上编织衣物篮依次连接；场景参考只锁暖杏墙面、蜂蜜色浅木、奶油与燕麦棉麻织物及从左后上方斜射的温暖晨光，不复制原图客厅布局、挑高窗、茶几、沙发或植物布置。全片只有一颗芥末黄色毛线球，带清晰交叉缠绕纹路与短线头，不复制、不换色、不与咪布融合；撞击后的两只拖鞋保持一只外旋、一只侧翻滑开的状态，软垫始终以约三十度缓坡搭住榻沿并保留受压凹痕，衣物篮始终直立且衣物保持落猫后的下陷状态。所有主要水平动作维持画面左向右，摄影机始终位于房间入口侧，不跨越动作轴；阳光方向、家具左右关系、道具数量和受力后的状态不可跳变。禁止新增人物、第二只猫、其他宠物、额外毛线球、额外家具、奇幻特效、速度旋涡、动作箭头、撞击文字、眩晕星星、爱心、字幕、品牌、水印、片尾卡、肢体增减、双尾、身份漂移、穿模、道具自动复位、无动机的镜头越轴或复制参考图中的客厅空间。</textarea></div></div>
+          </div>
+        </section>
+
+
+    <section class="panel method-guide">
+      <h2>建议使用方法</h2>
+      <div class="method-guide-title">按脚本还原度选择生成方式</div>
+      <div class="method-guide-definition">
+        这里的“还原度”，不是还原参考图，而是这个镜头需要多严格地贴合脚本。三档没有质量高低，只代表控制强度不同。
+      </div>
+
+      <div class="method-list">
+        <div class="method-head" aria-hidden="true">
+          <div>编号</div>
+          <div>还原度</div>
+          <div>适用情况</div>
+          <div>建议输入</div>
+        </div>
+
+        <article class="method-row">
+          <div class="method-index">01</div>
+          <div class="method-name">还原度低：自由发挥</div>
+          <div class="method-description">适合氛围、情绪和环境建立镜头。使用画面提示词、角色设定与场景参考，允许模型自行补充构图、动作和画面细节。</div>
+          <div class="method-inputs" aria-label="建议输入">
+            <span class="method-input">提示词</span>
+            <span class="method-input">角色参考</span>
+            <span class="method-input">场景参考</span>
+          </div>
+        </article>
+
+        <article class="method-row">
+          <div class="method-index">02</div>
+          <div class="method-name">还原度中：允许小幅偏离</div>
+          <div class="method-description">适合主体、场景和大构图需要稳定，但动作过程可以适度发挥的镜头。逐镜提示词完整写清构图、起始状态、动作路径、运镜和落点，可搭配用户实际提供的主体与场景参考。</div>
+          <div class="method-inputs" aria-label="建议输入">
+            <span class="method-input">主体参考</span>
+            <span class="method-input">场景参考</span>
+            <span class="method-input">提示词</span>
+          </div>
+        </article>
+
+        <article class="method-row">
+          <div class="method-index">03</div>
+          <div class="method-name">还原度高：基本不能偏</div>
+          <div class="method-description">适合关键动作、产品展示、空间连续性或重要转场。用文本明确起始状态、主体与镜头的完整路径、可见结果、连续性和禁止项；必要时拆短镜头分段生成。</div>
+          <div class="method-inputs" aria-label="建议输入">
+            <span class="method-input">产品/主体参考</span>
+            <span class="method-input">场景/风格参考</span>
+            <span class="method-input">提示词</span>
+          </div>
+        </article>
+      </div>
+
+      <div class="method-footer">
+        <div><strong>先判断这个镜头最不能错的是什么，</strong>再增加对应约束。还原度越高，单个镜头越要减负。</div>
+        <div class="method-footer-rule">没有默认最优解</div>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

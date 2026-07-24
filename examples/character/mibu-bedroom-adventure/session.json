@@ -1,0 +1,793 @@
+{
+  "project_title": "猫猫的房间大冒险",
+  "project_title_en": "Mibu's Great Bedroom Adventure",
+  "project_summary": "暖阳卧室里，英短蓝白猫咪布被一颗从床底滚出的毛线球吸引。一次追逐和意外碰撞让他蜷成猫猫圆球，穿过椅腿、撞散拖鞋、冲上软垫并飞进衣物收纳篮，最终抱住迟一步落到头顶的毛线球，满足地缩进衣服里。",
+  "workflow_mode": "prompt_control_no_ai_review",
+  "aspect_ratio": "16:9",
+  "display_options": {
+    "show_final_frames": true,
+    "show_storyboard_sheet": true,
+    "show_visual_references": true,
+    "show_durations": false,
+    "show_text_review": false
+  },
+  "parallel_generation": {
+    "enabled": true,
+    "multi_agent_required": true,
+    "state_writer": "orchestrator_only",
+    "dispatch_policy": "mandatory_for_independent_batches",
+    "dispatch_mode": "reduced_concurrency",
+    "min_parallel_batch_size": 2,
+    "max_line_art_workers": 4,
+    "max_final_frame_workers": 3,
+    "reduced_concurrency_reason": "咪布是强身份角色，8 镜共享一个紧密连续的原创卧室；完成画面采用两路并发以降低角色花色、领结、光线与空间锚点漂移。",
+    "worker_input": [
+      "session_path",
+      "assets_dir",
+      "project_mode",
+      "aspect_ratio",
+      "compact_production_reference",
+      "style_rules_when_needed",
+      "shot_id",
+      "prompt_text",
+      "reference_image_paths",
+      "target_output_path"
+    ],
+    "worker_output": [
+      "shot_id",
+      "asset_type",
+      "status",
+      "output_path",
+      "retry_prompt_if_failed",
+      "short_note"
+    ],
+    "rules": [
+      "线稿或最终帧批次中只要有 2 个及以上独立镜头，主 Agent 必须先创建 worker queue，再开始生图。",
+      "多 Agent 执行是默认必选项；使用本 skill 即视为默认允许独立生图 job 走子 Agent / worker delegation，除非用户明确要求串行。",
+      "生成前必须写入 dispatch_mode：multi_agent / reduced_concurrency / serial_unavailable。",
+      "只有当前环境没有可调用子 Agent / worker 能力，或工具策略阻止时，才能使用 serial_unavailable，并必须写清 reduced_concurrency_reason。",
+      "子 Agent 或串行 worker job 只负责生成图片并返回本地路径。",
+      "子 Agent 不改 session.json，不渲染 HTML，不重写脚本，不做图后审核。",
+      "主 Agent 按 worker 完成顺序串行合并结果、检查文件存在、写 JSON、刷新 HTML；HTML 展示顺序仍按 Shot 顺序。",
+      "所有 worker 必须使用 session.aspect_ratio；用户未指定时默认 16:9。",
+      "强身份一致性或连续空间项目可以把最终帧并发降到 1-2，但必须在 reduced_concurrency_reason 记录原因。"
+    ]
+  },
+  "project_mode": "character",
+  "current_stage": "final",
+  "stages": [
+    {
+      "key": "outline",
+      "label": "01 Outline",
+      "description": "Idea intake and scope lock"
+    },
+    {
+      "key": "script",
+      "label": "02 Script",
+      "description": "Shot list, action, timing, continuity"
+    },
+    {
+      "key": "revision",
+      "label": "03 Revision",
+      "description": "Approved changes on same shot structure"
+    },
+    {
+      "key": "line-art",
+      "label": "04 Line Art",
+      "description": "Structure lock before style rendering"
+    },
+    {
+      "key": "style",
+      "label": "05 Style",
+      "description": "Reference extraction and limits"
+    },
+    {
+      "key": "final",
+      "label": "06 Final Scenes",
+      "description": "Final prompts, outputs, delivery checks"
+    }
+  ],
+  "outline": {
+    "status": "ready for review",
+    "text": "阳光照进卧室，咪布趴在地毯上，盯住从床底滚出来的一颗芥末黄色毛线球。毛线球向房间右侧滚去，咪布立刻追赶，却用肩侧擦撞床脚；他下意识抱住尾巴、收紧四肢，蜷成圆滚滚的猫球，借着惯性继续向右滚。猫球穿过椅腿、撞开拖鞋，追着前方的毛线球滚上斜靠在窗边休憩榻边缘的厚软垫。软垫回弹让毛线球走一条更高、更慢的弧线，猫球则先落进装满浅色衣物的编织收纳篮。咪布晕乎乎地冒出脑袋，毛线球随后恰好落到头顶；他用前爪接住毛线球，满足地抱着它缩回衣物中。",
+    "working_summary": "8 镜、单一连续卧室、约 39 秒。角色身份与表演是主锁，空间路线固定为画面左侧床区到中央地毯障碍区，再到右侧软垫坡道与衣物篮；图 2 只借用暖阳、浅木和奶油织物气质，卧室布局完全重新设计。"
+  },
+  "visual_references": {
+    "characters": [
+      {
+        "label": "咪布角色设定图",
+        "path": "assets/reference-character-mibu.png",
+        "description": "锁定 2 岁英短蓝白公猫咪布：矮壮圆润、圆脸饱满腮部、大琥珀眼、粉鼻、灰蓝头背尾、白色口鼻胸腹与四爪，以及粉色 × 薄荷绿条纹蝴蝶结；不锁构图、镜头或动作。"
+      }
+    ],
+    "scenes": [
+      {
+        "label": "暖阳居家风格参考（非场景布局）",
+        "path": "assets/reference-style-warm-sunlight.png",
+        "description": "只借用暖杏色、浅木、奶油织物、自然绿植和大面积温暖斜射日光的气质；这不是场景图，不复制原图客厅、挑高窗、茶几、沙发或植物布局，卧室空间必须重新设计。"
+      }
+    ],
+    "usage_note": "角色图负责身份、花色、比例与领结；环境图仅负责未来成片的色温、材质与舒适自然光风格。线稿阶段只锁重新设计的卧室结构、构图和动作，不绘制光影或材质。"
+  },
+  "script": {
+    "status": "ready for review",
+    "review_notes": [
+      "项目模式为 character；单一卧室空间同时采用强空间连续性锁。",
+      "场景预算为一个主场景、8 个连续机位；所有主要水平动作保持屏幕左向右，摄影机不越过动作轴。",
+      "将穿过椅腿与撞开拖鞋拆成两个镜头，避免一个镜头塞入两个障碍节拍。",
+      "毛线球在软垫顶端被弹入更高、更慢的弧线，解释其为何晚于咪布落入收纳篮。",
+      "本轮只提交脚本包和逐镜线稿提示词；确认前不生成线稿，最终彩帧分支未启用。"
+    ],
+    "open_questions": []
+  },
+  "text_review": {
+    "status": "passed",
+    "mode": "text_only_pre_generation",
+    "rules": [
+      "只审脚本和提示词文本，不上传生成后的线稿做 AI 图像审核。",
+      "脚本确认前检查：镜头顺序、因果关系、动作连续性、机位动机、空间/角色/道具连续性。",
+      "线稿生成前检查：每个 line-art prompt 是否只要求轮廓线稿，是否锁定主体、场景、动作、构图、透视和不可漂移项。",
+      "如果文本审查发现会影响多个镜头的问题，先回到脚本修改，不进入生图。",
+      "如果只发现单个镜头的提示词风险，先改该镜头 line-art prompt，再进入并行生图。"
+    ],
+    "script_logic_check": {
+      "status": "passed",
+      "summary": "8 镜因果链完整：球滚出 -> 咪布追逐 -> 擦撞抱尾蜷缩 -> 穿椅腿 -> 撞散拖鞋 -> 软垫双弧起跳 -> 先落篮冒头 -> 毛线球晚到并被抱住。每镜一个主要动作节拍，单一卧室地理和左向右轴线明确，相邻机位有功能性变化。",
+      "blocking_issues": [],
+      "fixes_applied": [
+        "把穿椅腿与撞拖鞋拆成独立镜头，避免同镜动作过载。",
+        "明确肩侧擦撞而非正面撞停，使咪布蜷缩后仍保留向右滚动动量。",
+        "让软垫回弹把毛线球送入更高更慢弧线，修复毛线球晚于咪布落篮的时序。",
+        "锁定床左篮右、入口侧机位和不跨 180 度轴线，避免追逐方向翻转。",
+        "锁定拖鞋散开、软垫凹陷和衣物下陷等可见结果，禁止后续道具自动复位。"
+      ]
+    },
+    "line_art_prompt_preflight": {
+      "status": "passed",
+      "summary": "8 条逐镜线稿提示词均包含主体与环境、起点到落点动作、代表性冻结瞬间、明确机位、前后镜连续性、用户参考图职责、纯轮廓规则和专属避免项；不依赖生成线稿或未来彩帧。",
+      "blocking_issues": [],
+      "fixes_applied": [
+        "逐镜显式加入 contour-only 约束，禁止阴影、灰度、排线、纹理、材质和光效。",
+        "每镜只冻结一个代表性瞬间，禁止多重姿态、动作拼贴、残影、箭头与速度旋涡。",
+        "在滚动镜头持续写明耳朵、白爪、尾巴与领结，避免咪布变成无身份普通毛球。",
+        "明确角色图锁身份、风格图不锁布局，并禁止复制原图客厅。",
+        "逐镜锁定唯一毛线球、固定家具位置和道具前后状态，避免复制、穿模与复位。"
+      ]
+    }
+  },
+  "production_reference": {
+    "primary_anchor": [
+      "咪布：2 岁英短蓝白公猫，矮壮紧凑、短粗四肢、圆脸大琥珀眼、粉鼻、灰蓝头背尾与白色口鼻胸腹四爪，始终佩戴粉色 × 薄荷绿条纹蝴蝶结和细深色项圈。",
+      "唯一毛线球：芥末黄色，约 10–12 厘米，三组清晰交叉缠绕纹路并带一小段短线头；全片不得复制或换色。",
+      "重新设计的卧室：左侧浅木低床，中央燕麦色大地毯与四腿浅木椅，右侧低矮木框窗边休憩榻；厚方形软垫下端落在地毯、上端搭住榻沿，榻右半边放装有浅色衣物的宽口浅棕编织篮。"
+    ],
+    "continuity_rules": [
+      "主动作轴固定为画面左侧床尾右脚 -> 中央椅腿 -> 奶油色拖鞋 -> 软垫坡道 -> 右侧休憩榻上的收纳篮；水平运动始终左向右，摄影机保持在动作轴南侧／房间入口侧。",
+      "咪布侧身擦撞床脚后仍保留向右动量；蜷缩滚动时保持顺时针旋转，可夸张压缩 10–15%，但耳朵、四爪、尾巴轮廓和蝴蝶结仍可辨认。",
+      "毛线球在 Shot 01-05 始终领先咪布；Shot 06 由软垫回弹进入更高更慢弧线，Shot 07 位于篮口上方画外，Shot 08 垂直落到咪布头顶后被双爪抱住。",
+      "拖鞋初始并排且鞋头向右；撞击后近镜头一只外旋约 60 度，另一只向右滑动并侧翻，后续若入镜不得复位。",
+      "软垫始终搭住休憩榻形成约 30–35 度缓坡；通过时只允许局部压缩并留下凹痕，不得翻面、消失或变成硬板。",
+      "收纳篮始终直立在休憩榻右半坐垫，浅色衣物约三分之二满；落地时衣物下陷但篮体不倾倒。",
+      "允许变化：咪布姿态、视线、耳朵角度、蝴蝶结轻摆、摄影机距离和高度、道具受力状态；禁止变化：角色花色比例、领结配色、房间左右关系、道具数量和日光方向。"
+    ],
+    "world_lock": [
+      "卧室为原创布局，不复制风格参考图的客厅：普通尺度东向窗位于左后侧，暖杏墙面、蜂蜜色浅木家具、燕麦与奶油棉麻织物；阳光统一从画面左后上方斜向右前方。",
+      "大地毯覆盖追逐路线；绿植仅允许在窗边远背景出现一到两盆，不遮挡床脚、椅腿、拖鞋、软垫或收纳篮。",
+      "整体气质温暖、安静、真实居家且带轻喜剧；不添加人类、第二只猫、额外宠物、茶几、挑高窗、繁密植物、文字卡、品牌或奇幻特效。"
+    ],
+    "video_asset_policy": [
+      "默认视频输入为 text_only；每条逐镜视频提示词必须自包含环境、空间关系、起点、单一动作路径、摄影机、落点和连续性。",
+      "用户提供的角色图只锁咪布身份；用户提供的环境图只锁未来完成画面的色温和材质倾向，不锁布局。",
+      "内部生成线稿或未来彩帧只作为作者参考，不写入 copy-ready 视频提示词，不要求用户上传或 @ 内部资产。",
+      "当前只到脚本包审批；确认后才并行生成线稿。最终彩帧默认不生成。所有资产只保存在本 session 的 assets/ 并以项目相对路径登记。"
+    ]
+  },
+  "character_performance_lock": {
+    "identity_anchor": [
+      "咪布始终是同一只两岁英短蓝白公猫：矮壮圆润、短腿、圆脸、大琥珀眼、粉鼻、白色口鼻胸腹四爪、灰蓝头背尾。",
+      "粉色 × 薄荷绿条纹蝴蝶结与细深色项圈是身份标记；跑动和滚动时只允许轻微偏转，冒出篮子时必须回到胸前可辨识位置。",
+      "不可变成长毛猫、尖脸猫、瘦长体型、成年大猫、纯灰猫或黑白燕尾服花色。"
+    ],
+    "acting_path_rules": [
+      "表演递进固定为懒洋洋专注 -> 兴奋追逐 -> 突然受惊 -> 本能抱尾蜷缩 -> 无法控制地滚动 -> 半空惊讶 -> 落篮晕眩 -> 抱球满足。",
+      "允许改变眼神、瞳孔、耳朵角度、胡须、嘴形、重心和四肢收放；每镜仍只呈现一个起点到落点的主要动作路径。",
+      "滚动时咪布向右顺时针旋转，身体可压缩但四肢数量、尾巴、耳朵和蝴蝶结必须存在；不得成为无特征的普通毛球。"
+    ],
+    "reference_roles": [
+      "咪布角色设定图只锁身份、脸、花色、体型与领结，不锁任何镜头构图或动作。",
+      "暖阳居家图片只锁色温、浅木与棉麻材质倾向，不锁客厅空间或家具位置；卧室布局以 production_reference 为准。"
+    ],
+    "drift_risks": [
+      "避免花色漂移、领结消失或换色、长毛化、尖脸化、身体变瘦、眼睛变色。",
+      "避免滚动状态出现多余四肢、双尾、缺耳、尾巴与身体分离，或与芥末黄色毛线球融合。",
+      "避免同一画面出现多只咪布、多个动作残影、多颗毛线球、动作箭头、字幕或速度旋涡。"
+    ]
+  },
+  "shots": [
+    {
+      "id": "Shot 01",
+      "status": "script_ready",
+      "aspect_ratio": "16:9",
+      "duration": "5s",
+      "purpose": "建立咪布、毛线球诱因、晨间光线和从床区通往房间右侧的完整路线。",
+      "frame": "猫眼高度三分之四宽景；浅木低床位于左后，燕麦色大地毯横贯中景，咪布趴在左前景并面向右侧。浅木椅、奶油拖鞋、软垫坡道和右侧休憩榻上的编织篮依次在深景中可读，左后窗外的阳光方向明确。",
+      "action": "起点：咪布懒洋洋趴着，视线停在床底阴影。过程：唯一的芥末黄色毛线球从床底滚出并向右移动，咪布的眼睛与脑袋连续跟随。落点：毛线球仍向右滚，咪布压低前身、后腿收紧进入蓄势姿态。",
+      "camera": "35mm 猫眼高度宽景，沿房间轴线做缓慢短推，不横移；始终保留床、路线和右侧篮子的地理关系。",
+      "continuity": "建立全片床左、篮右、动作左向右、阳光左后上方的空间锁；Shot 02 从相同屏幕方向切到地毯高度侧跟拍，只允许咪布由趴卧变为起跑。",
+      "line_art": "Use case: illustration-story. Asset type: contour-only storyboard line art for Shot 01. Locked 16:9. FRAME SETUP: cat-eye-height three-quarter bedroom wide view, low pale-wood bed at rear left, large oval oatmeal rug across center, Mibu lying at left foreground facing right; four-leg pale-wood chair, one pair of slippers, leaning cushion ramp, low window daybed and wide woven clothes basket readable in that left-to-right order. ACTION PATH: START Mibu watches the dark gap under the bed; PROCESS one mustard-yellow yarn ball rolls out toward screen right while his eyes and head follow; END he lowers his chest and gathers hind legs to pounce. REPRESENTATIVE FREEZE: freeze the late tracking moment, ball one body length ahead and Mibu visibly coiled, no multiple poses. CAMERA: 35mm cat-eye wide view with a short physical push, entrance-side of the action axis. CHARACTER REFERENCE DUTY: lock the same stocky blue-and-white British Shorthair, round amber eyes, pink nose, white muzzle/chest/paws, gray-blue head/back/tail, pink-and-mint bow tie. STYLE REFERENCE DUTY: do not copy its living-room layout; only the planned original bedroom geography applies. CONTOUR ONLY: thin sparse clean black outlines on white, depth by overlap and minimal perspective guides; no shadow, gray fill, hatching, texture, fur rendering, material, sunlight beams or decorative polish. AVOID: humans, extra cats, extra balls, duplicated furniture, text, labels, arrows, motion blur or crossed room geography.",
+      "style_notes": "未来完成画面借用暖杏、浅木、奶油织物与晨间斜阳；线稿不表现颜色、光束或材质。",
+      "final_prompt": "",
+      "video_prompt": {
+        "seedance2": "原创暖阳卧室的猫眼高度三分之四宽景：浅木低床在左后，燕麦色大地毯延伸向右，中央依次能看见浅木椅、奶油拖鞋、斜靠休憩榻的厚软垫和榻上的编织衣物篮。两岁英短蓝白公猫咪布矮壮圆润，圆脸、琥珀眼、粉鼻、白色口鼻胸腹四爪、灰蓝头背尾，胸前戴粉色与薄荷绿条纹蝴蝶结；他趴在左前景。唯一的芥末黄色毛线球从床底滚出并继续向右，咪布的眼睛和脑袋随球转动，最后压低前身、收紧后腿蓄势。摄影机在房间入口侧用 35mm 猫眼高度缓慢短推，床左篮右和左后方自然光方向不变。禁止额外猫、额外毛线球、人类、文字、箭头和复制参考图客厅布局。",
+        "reference_frame": "",
+        "duration": "5s",
+        "primary_motion": "毛线球从床底滚出向右 -> 咪布目光与脑袋跟随 -> 压低身体蓄势",
+        "camera_motion": "cat-eye slow push-in",
+        "preserve": [
+          "咪布身份和领结",
+          "床左篮右的完整地理",
+          "唯一芥末黄色毛线球",
+          "阳光来自左后上方"
+        ],
+        "avoid": [
+          "extra cat or yarn ball",
+          "copied living-room layout",
+          "text or arrows",
+          "unmotivated camera crossing"
+        ],
+        "audio": "毛线轻擦地毯、轻微项圈声与安静室内环境声，不生成音乐",
+        "notes": "文本自包含，不依赖内部线稿或最终帧。"
+      },
+      "video_readiness": {
+        "status": "blocked_until_line_art_confirmed",
+        "first_frame_path": "",
+        "motion_intensity": "low",
+        "camera_motion": "slow push-in",
+        "risk_level": "medium",
+        "must_preserve": [
+          "character identity",
+          "room geography",
+          "single yarn ball",
+          "left-to-right route"
+        ],
+        "test_status": "not_started"
+      },
+      "output": "pending"
+    },
+    {
+      "id": "Shot 02",
+      "status": "script_ready",
+      "aspect_ratio": "16:9",
+      "duration": "5s",
+      "purpose": "把静态好奇升级为追逐，并明确毛线球绕过床脚而咪布选择更贴近床脚的内线。",
+      "frame": "地毯高度的侧面中宽景，床沿形成上方水平线，咪布在画面左侧，毛线球在右侧领先约一个猫身；床尾右侧床脚位于前进路线的右前方。",
+      "action": "起点：咪布处于蓄势姿态，毛线球继续右滚。过程：咪布蹬地加速沿床边追赶，毛线球从床脚外侧绕过，咪布盯着球走更靠内的路线。落点：球已越过床脚，咪布冲向床脚且来不及避让。",
+      "camera": "50mm 地毯高度向右侧移跟拍，与咪布近似同速，始终让球在前、咪布在后、床脚在路径上可读。",
+      "continuity": "承接 Shot 01 的左向右动作和蓄势姿态；咪布身份、领结、球的唯一性不变。Shot 03 在同一轴线南侧切到床尾三分之二机位，球继续向右离开。",
+      "line_art": "Use case: illustration-story. Asset type: contour-only storyboard line art for Shot 02. Locked 16:9. FRAME SETUP: rug-level side medium-wide view beside the same low bed, Mibu at screen left in the inside lane, one mustard yarn ball one body length ahead at screen right, the rear-right bed foot directly in Mibu's future path. ACTION PATH: START Mibu launches from his crouch; PROCESS he accelerates right while the ball clears the outside of the bed foot and he follows too close on the inside; END his shoulder is about to meet the bed foot. REPRESENTATIVE FREEZE: freeze one instant just before impact, forepaws extended and eyes locked on the ball, no collision yet. CAMERA: 50mm entrance-side lateral track to the right, ball always ahead. CONTINUITY: same stocky blue-white Mibu, pink-and-mint bow tie, same rug and bed geometry, same left-to-right direction. CONTOUR ONLY: thin sparse outlines on white, overlap for depth, no shadow, gray, hatching, texture, fur, sunlight effects or motion streaks. AVOID: mirrored direction, missing bow tie, duplicate limbs, extra ball, bed-foot relocation, arrows, text, labels or multi-pose action collage.",
+      "style_notes": "动作清晰优先，未来完成画面保留暖阳但不让强光遮住床脚碰撞原因。",
+      "final_prompt": "",
+      "video_prompt": {
+        "seedance2": "同一原创暖阳卧室的地毯高度侧面中宽景，浅木低床在上方形成水平边，床尾右侧床脚清楚挡在内侧路线。矮壮圆润的英短蓝白猫咪布从左侧蓄势蹬出，粉色与薄荷绿蝴蝶结随跑动轻摆；唯一的芥末黄色毛线球在右侧领先约一个猫身，先从床脚外侧绕过。咪布只盯着球，沿更贴近床脚的内线加速，结尾肩侧即将碰到床脚。摄影机在房间入口侧以 50mm 地毯高度向右平稳侧移跟拍，球始终在前、猫始终在后。禁止反向运动、球复制、床脚移位、角色换花色、文字或夸张速度旋涡。",
+        "reference_frame": "",
+        "duration": "5s",
+        "primary_motion": "咪布蹬地追球 -> 球绕过床脚外侧 -> 咪布沿内线逼近床脚",
+        "camera_motion": "rug-level lateral track right",
+        "preserve": [
+          "咪布蓝白花色与领结",
+          "球领先一个猫身",
+          "床脚在内线",
+          "左向右运动"
+        ],
+        "avoid": [
+          "direction reversal",
+          "duplicate ball",
+          "relocated bed foot",
+          "extra limbs or motion ghosts"
+        ],
+        "audio": "爪垫快速摩擦地毯、毛线球轻滚与领结细响，不生成音乐",
+        "notes": "文本自包含，不依赖内部线稿或最终帧。"
+      },
+      "video_readiness": {
+        "status": "blocked_until_line_art_confirmed",
+        "first_frame_path": "",
+        "motion_intensity": "high",
+        "camera_motion": "lateral track right",
+        "risk_level": "medium",
+        "must_preserve": [
+          "left-to-right chase",
+          "ball leading",
+          "inside/outside bed-foot lanes",
+          "Mibu identity"
+        ],
+        "test_status": "not_started"
+      },
+      "output": "pending"
+    },
+    {
+      "id": "Shot 03",
+      "status": "script_ready",
+      "aspect_ratio": "16:9",
+      "duration": "5s",
+      "purpose": "完成核心喜剧转折：擦撞床脚后本能抱尾蜷缩，并让剩余动量自然转化为滚动。",
+      "frame": "床尾前方的三分之二中景，床尾右脚固定在画面中左，咪布从左后方沿内线冲入，毛线球已在右前方继续滚走。",
+      "action": "起点：咪布肩侧即将擦到床脚。过程：肩侧轻撞后身体因前冲转动，他下意识用前爪抱住尾巴、收拢四肢。落点：咪布蜷成仍带耳朵、爪与领结特征的猫猫圆球，保留向右动量并开始顺时针滚出。",
+      "camera": "50mm 固定三分之二机位；碰撞发生时做极短物理后拉，不使用画面震动或特效。",
+      "continuity": "承接 Shot 02 的同一床脚、内外路线与向右速度；球继续领先。Shot 04 从同侧稍高机位承接猫球顺时针向右滚入椅腿区域。",
+      "line_art": "Use case: illustration-story. Asset type: contour-only storyboard line art for Shot 03. Locked 16:9. FRAME SETUP: entrance-side front three-quarter medium view at the same rear-right bed foot, ball already rolling away at far right, Mibu entering from left-rear on the inside lane. ACTION PATH: START his shoulder grazes the bed foot; PROCESS forward momentum turns his torso as both forepaws catch his tail and all limbs tuck; END he becomes a compact but recognizable cat-ball beginning a clockwise roll toward screen right. REPRESENTATIVE FREEZE: freeze the late curl when ears, one white paw edge, gray-blue and white contour regions, tucked tail and pink-and-mint bow tie remain identifiable; one body state only. CAMERA: fixed 50mm three-quarter view with a tiny physical pullback at contact, no shake effect. CONTINUITY: same bed foot, ball remains ahead, rightward momentum never stops. CONTOUR ONLY: thin clean outlines, depth by overlap, no shading, gray fills, hatching, fur texture, impact stars, speed streaks or decorative marks. AVOID: head-on dead stop, unexplained restart, perfect featureless sphere, fusion with yarn ball, missing ears/tail/bow tie, extra limbs, multiple poses, arrows, text or labels.",
+      "style_notes": "喜剧来自清楚的身体力学与表情，不使用撞击星星或卡通文字。",
+      "final_prompt": "",
+      "video_prompt": {
+        "seedance2": "同一卧室床尾前方的三分之二中景，浅木床尾右脚固定在画面中左，唯一的芥末黄色毛线球已经越过床脚并继续向右。英短蓝白猫咪布从左后方内线冲入，肩侧轻轻擦撞床脚；前冲动量带动身体转动，他本能地用前爪抱住尾巴、收拢四肢，最后蜷成圆滚滚但仍能辨出灰白分区、耳朵、白爪边缘、尾巴与粉色薄荷绿蝴蝶结的猫猫圆球，保持向右动量开始顺时针滚动。摄影机在同一动作轴南侧用 50mm 固定机位，碰撞时只做极短物理后拉。禁止撞停后凭空启动、变成无特征毛球、与毛线球融合、多余肢体、撞击文字或画面震动。",
+        "reference_frame": "",
+        "duration": "5s",
+        "primary_motion": "肩侧擦撞床脚 -> 抱住尾巴收拢四肢 -> 变成猫球继续向右顺时针滚",
+        "camera_motion": "locked three-quarter with tiny pullback",
+        "preserve": [
+          "擦撞而非正面撞停",
+          "向右剩余动量",
+          "猫球身份特征",
+          "球继续领先"
+        ],
+        "avoid": [
+          "featureless sphere",
+          "cat-yarn fusion",
+          "extra limbs",
+          "impact graphics or shake"
+        ],
+        "audio": "轻闷碰撞、短促惊叫、毛发与地毯摩擦声，不生成音乐",
+        "notes": "文本自包含，不依赖内部线稿或最终帧。"
+      },
+      "video_readiness": {
+        "status": "blocked_until_line_art_confirmed",
+        "first_frame_path": "",
+        "motion_intensity": "high",
+        "camera_motion": "locked with tiny pullback",
+        "risk_level": "high",
+        "must_preserve": [
+          "shoulder graze mechanics",
+          "recognizable curled Mibu",
+          "clockwise roll",
+          "single ball ahead"
+        ],
+        "test_status": "not_started"
+      },
+      "output": "pending"
+    },
+    {
+      "id": "Shot 04",
+      "status": "script_ready",
+      "aspect_ratio": "16:9",
+      "duration": "4s",
+      "purpose": "证明滚动路线与房间地理连续，让猫球成功穿过椅腿并朝拖鞋前进。",
+      "frame": "同侧稍高的俯三分之四中宽景，浅木四腿椅居中，椅腿之间的通道清楚，毛线球已在椅子右侧，猫球从左下方滚入；右后景能看到尚未被碰动的奶油拖鞋和软垫下缘。",
+      "action": "起点：毛线球先穿过椅腿，猫球从左侧接近。过程：咪布保持顺时针旋转，从两条椅腿之间的宽通道滚过。落点：猫球完整穿出椅子右侧，前方正对并排拖鞋，椅子保持原位。",
+      "camera": "35mm 稍高俯三分之四机位，沿动作方向做短幅向右摇移，保持椅子为固定地理锚点。",
+      "continuity": "承接 Shot 03 的猫球形态、旋转方向与球在前关系；不越轴。Shot 05 从更低侧面机位承接拖鞋初始并排状态。",
+      "line_art": "Use case: illustration-story. Asset type: contour-only storyboard line art for Shot 04. Locked 16:9. FRAME SETUP: slightly high entrance-side three-quarter medium-wide view, one pale-wood four-leg chair centered with a clearly open leg channel, yarn ball already beyond it at screen right, compact recognizable Mibu cat-ball entering from lower left; untouched paired slippers and cushion-ramp base readable in right background. ACTION PATH: START ball clears the chair first; PROCESS Mibu rolls clockwise between two chair legs without contact; END his whole body exits at right facing the slippers. REPRESENTATIVE FREEZE: freeze when Mibu is centered between the two chair legs, ears, bow tie, tucked tail and white paw edge readable, one state only. CAMERA: 35mm short pan/track right while chair stays the fixed geography anchor. CONTINUITY: same rightward roll, ball stays ahead, slippers remain paired and untouched. CONTOUR ONLY: sparse thin black outlines on white, overlap and minimal perspective only; no shadows, gray, hatching, texture, fur, light beams, motion blur or speed spirals. AVOID: chair-leg collision, impossible leg spacing, reversed rotation, featureless cat-ball, extra furniture, extra balls, ghost poses, arrows, text or labels.",
+      "style_notes": "线稿优先读清椅腿间距、猫球大小和右侧下一障碍。",
+      "final_prompt": "",
+      "video_prompt": {
+        "seedance2": "同一原创卧室的稍高俯三分之四中宽景，一把浅木四腿椅居中，椅腿之间有足够猫球通过的宽通道；唯一的芥末黄色毛线球已经先到椅子右侧，后方还能看见并排未动的奶油拖鞋和软垫坡道下缘。仍可辨出灰白分区、耳朵、白爪、尾巴和粉色薄荷绿蝴蝶结的咪布猫球从左下方顺时针滚入，沿同一条左向右路线完整穿过两条椅腿，最后滚出椅子右侧正对拖鞋。摄影机在入口侧稍高位置短幅向右摇移，让椅子保持固定地理锚点。禁止碰撞椅腿、跨轴、旋转反向、猫球失去身份、拖鞋提前散开或出现多颗球。",
+        "reference_frame": "",
+        "duration": "4s",
+        "primary_motion": "毛线球先穿椅腿 -> 猫球顺时针穿过宽通道 -> 完整滚出并对准拖鞋",
+        "camera_motion": "slightly high short pan-track right",
+        "preserve": [
+          "chair as fixed anchor",
+          "clockwise rightward roll",
+          "ball ahead",
+          "slippers untouched"
+        ],
+        "avoid": [
+          "chair collision",
+          "axis crossing",
+          "rotation reversal",
+          "featureless cat-ball"
+        ],
+        "audio": "猫球滚过地毯、椅腿轻微木质共鸣与毛线球滚动声，不生成音乐",
+        "notes": "文本自包含，不依赖内部线稿或最终帧。"
+      },
+      "video_readiness": {
+        "status": "blocked_until_line_art_confirmed",
+        "first_frame_path": "",
+        "motion_intensity": "high",
+        "camera_motion": "short pan-track right",
+        "risk_level": "medium",
+        "must_preserve": [
+          "chair leg clearance",
+          "Mibu identity in ball form",
+          "ball ahead",
+          "untouched slippers"
+        ],
+        "test_status": "not_started"
+      },
+      "output": "pending"
+    },
+    {
+      "id": "Shot 05",
+      "status": "script_ready",
+      "aspect_ratio": "16:9",
+      "duration": "5s",
+      "purpose": "制造第二个障碍笑点，用散开的拖鞋留下运动痕迹并把路线明确引向软垫坡道。",
+      "frame": "入口侧贴地近中景，两只奶油色开口拖鞋并排处于前中景、鞋头朝右，中间窄缝只够毛线球穿过；软垫从右后方地毯斜靠到休憩榻边缘。毛线球在右侧坡道下缘，猫球从左侧逼近拖鞋。",
+      "action": "起点：毛线球穿过两只拖鞋的窄缝，猫球紧随。过程：较大的猫球撞中拖鞋，近镜头一只外旋，另一只向右滑动并侧翻。落点：猫球没有停顿，继续向右滚向软垫下缘，散开的拖鞋留在身后。",
+      "camera": "65mm 贴地侧面机位，先固定看清球穿缝与撞击，再做短幅向右跟随到软垫下缘。",
+      "continuity": "承接 Shot 04 的猫球从椅子右侧进入和拖鞋未动状态；球始终领先。Shot 06 开始时拖鞋保持散开，猫球和球都已抵达同一软垫坡道。",
+      "line_art": "Use case: illustration-story. Asset type: contour-only storyboard line art for Shot 05. Locked 16:9. FRAME SETUP: entrance-side floor-level medium-close view, one pair of cream open slippers side by side in foreground with toes pointing right and a narrow center gap; one mustard yarn ball already through the gap near the cushion-ramp base, recognizable Mibu cat-ball arriving from left, thick square cushion leaning from rug to low daybed at right rear. ACTION PATH: START small ball passes the gap; PROCESS larger Mibu cat-ball strikes the pair, near slipper rotates outward and far slipper slides right and tips; END Mibu continues toward the cushion while displaced slippers stay behind. REPRESENTATIVE FREEZE: freeze just after contact, one slipper turned outward, the other beginning to tip, Mibu still a single compact rolling state. CAMERA: 65mm floor-level side view, locked through impact then a short physical follow right. CONTINUITY: ball ahead, clockwise rightward roll, same cushion ramp; slipper displacement becomes permanent. CONTOUR ONLY: thin sparse outlines, white background, no shadow, gray, hatching, texture, material, sunlight, impact stars or motion blur. AVOID: ball clipping through slippers, duplicate footwear, slippers resetting, Mibu stopping, extra limbs, ghost poses, arrows, captions, text or labels.",
+      "style_notes": "让拖鞋位移承担喜剧结果，不用撞击图形；软垫坡道在右后方清晰可见。",
+      "final_prompt": "",
+      "video_prompt": {
+        "seedance2": "同一卧室入口侧的贴地近中景，一双奶油色开口拖鞋并排位于前中景，鞋头朝右，中间只留够小毛线球通过的窄缝；右后方厚方形软垫由地毯斜搭到低矮窗边休憩榻。唯一的芥末黄色毛线球先穿过拖鞋窄缝到达坡道下缘，仍能辨出灰白花色、耳朵、白爪边缘、尾巴和粉色薄荷绿蝴蝶结的咪布猫球紧随而来，撞中两只拖鞋：近镜头一只外旋约六十度，另一只向右滑动并侧翻。咪布不停止，继续顺时针向右滚向软垫，散开的拖鞋留在原地。摄影机用 65mm 贴地侧面机位看清撞击，再短幅跟到坡道。禁止穿模、拖鞋复制或复位、猫球停住、跨轴、文字与撞击星星。",
+        "reference_frame": "",
+        "duration": "5s",
+        "primary_motion": "毛线球穿过窄缝 -> 猫球撞散两只拖鞋 -> 继续滚向软垫",
+        "camera_motion": "floor-level locked impact then short follow right",
+        "preserve": [
+          "single paired slippers before impact",
+          "permanent displaced slipper states",
+          "ball ahead",
+          "same cushion ramp"
+        ],
+        "avoid": [
+          "object clipping",
+          "duplicated footwear",
+          "slipper reset",
+          "cat-ball stopping or reversing"
+        ],
+        "audio": "毛线球轻滚、拖鞋被顶开的软闷声和持续滚动声，不生成音乐",
+        "notes": "文本自包含，不依赖内部线稿或最终帧。"
+      },
+      "video_readiness": {
+        "status": "blocked_until_line_art_confirmed",
+        "first_frame_path": "",
+        "motion_intensity": "high",
+        "camera_motion": "locked then short follow",
+        "risk_level": "medium",
+        "must_preserve": [
+          "slipper before/after states",
+          "rightward roll",
+          "ball ahead",
+          "ramp geography"
+        ],
+        "test_status": "not_started"
+      },
+      "output": "pending"
+    },
+    {
+      "id": "Shot 06",
+      "status": "script_ready",
+      "aspect_ratio": "16:9",
+      "duration": "5s",
+      "purpose": "用软垫坡道把地面追逐升级为空中动作，并建立猫先落篮、毛线球稍后落下的时间差。",
+      "frame": "软垫南前方低机位三分之二近景，厚软垫由左下通向右上并搭在休憩榻边，榻右侧编织篮的宽口和浅色衣物可见。毛线球位于坡道上段，猫球从左下坡道底部滚上。",
+      "action": "起点：毛线球先滚到软垫上段，猫球压上坡道。过程：软垫被猫球压缩后回弹，毛线球被弹入更高更慢的弧线，猫球沿较低弧线从坡顶腾空。落点：猫球先开始朝篮口下坠，毛线球仍在其上方继续上升或悬于高弧顶点。",
+      "camera": "35mm 低位顺软垫向上短推并小幅上仰，保持两个不同高度的弧线和篮口目标同时可读。",
+      "continuity": "承接 Shot 05 的同一坡道与右向动量；拖鞋散开状态可留在左后景。Shot 07 从篮口上方承接猫球先落下，毛线球暂时留在画外上方。",
+      "line_art": "Use case: illustration-story. Asset type: contour-only storyboard line art for Shot 06. Locked 16:9. FRAME SETUP: low entrance-side front three-quarter view up one thick square cushion ramp running lower-left to upper-right against the low daybed; wide woven clothes basket on the daybed at right with its open rim visible; yarn ball on upper ramp, recognizable Mibu cat-ball climbing from lower-left; displaced slippers may remain small in far-left background. ACTION PATH: START ball reaches upper cushion and Mibu compresses the ramp below; PROCESS cushion rebounds, sending yarn ball into a higher slower arc and Mibu into a lower arc; END Mibu begins descending toward basket while ball remains visibly higher. REPRESENTATIVE FREEZE: freeze immediately after launch with one Mibu state and one yarn ball, clearly separated vertical arcs, basket target readable. CAMERA: 35mm low physical push up the cushion followed by a small tilt up, no axis cross. CONTINUITY: same rightward momentum, same ramp angle, basket location fixed. CONTOUR ONLY: thin sparse outlines on white, depth by overlap; no shadow, gray, hatching, texture, fabric rendering, sunlight, speed trails, arrows or arc diagrams. AVOID: hard-board cushion, duplicated cat or ball, fused subjects, unexplained basket move, upside-down Mibu, missing identity features, text or labels.",
+      "style_notes": "空中动作的高度差必须读清；线稿不画运动轨迹线，只通过位置和姿态表达。",
+      "final_prompt": "",
+      "video_prompt": {
+        "seedance2": "同一原创卧室右侧的低机位三分之二近景，一只厚方形软垫从左下地毯斜搭到右上低矮休憩榻边，榻右半坐垫上的宽口浅棕编织篮装着浅色衣物。唯一的芥末黄色毛线球先滚到软垫上段，仍保留灰白分区、耳朵、白爪边缘、尾巴和粉色薄荷绿蝴蝶结的咪布猫球从左下压上坡道。软垫局部压缩后回弹，把毛线球送入更高、更慢的弧线，咪布沿较低弧线从坡顶腾空并先朝篮口下坠；结尾毛线球仍在咪布上方。摄影机用 35mm 低位顺坡短推并小幅上仰，让两条不同高度的运动和篮口目标同时清楚。禁止软垫变硬板、球或猫复制、两者融合、篮子移位、跨轴和轨迹箭头。",
+        "reference_frame": "",
+        "duration": "5s",
+        "primary_motion": "球先到坡道上段 -> 猫球压缩软垫并回弹 -> 球走高弧、猫走低弧先下坠",
+        "camera_motion": "low push up ramp then slight tilt up",
+        "preserve": [
+          "same cushion ramp",
+          "basket target at right",
+          "higher slower yarn arc",
+          "lower earlier Mibu arc"
+        ],
+        "avoid": [
+          "duplicated subjects",
+          "hard ramp",
+          "cat-yarn fusion",
+          "unreadable arc order"
+        ],
+        "audio": "软垫压缩回弹、短促惊叫、空气掠过与衣物轻响，不生成音乐",
+        "notes": "文本自包含，不依赖内部线稿或最终帧。"
+      },
+      "video_readiness": {
+        "status": "blocked_until_line_art_confirmed",
+        "first_frame_path": "",
+        "motion_intensity": "high",
+        "camera_motion": "low push and tilt up",
+        "risk_level": "high",
+        "must_preserve": [
+          "two distinct arc heights",
+          "Mibu identity",
+          "basket target",
+          "soft cushion deformation"
+        ],
+        "test_status": "not_started"
+      },
+      "output": "pending"
+    },
+    {
+      "id": "Shot 07",
+      "status": "script_ready",
+      "aspect_ratio": "16:9",
+      "duration": "5s",
+      "purpose": "给高速滚动一个柔软落点，并用晕乎乎冒头的停顿为最后的毛线球笑点蓄力。",
+      "frame": "休憩榻正面、略高于篮沿的斜俯中近景，宽口浅棕编织篮直立在右半坐垫，约三分之二装满奶油与浅灰衣物；画面上沿留出毛线球稍后进入的空间。",
+      "action": "起点：猫球从画面左上沿较低弧线落向篮口。过程：咪布落进衣物，衣物明显下陷并向篮沿鼓起，篮体保持直立。落点：短暂停顿后，咪布晕乎乎地从中央冒出脑袋和两只前爪，耳朵略歪并定住。",
+      "camera": "50mm 略高于篮沿的固定斜俯机位，落地后做非常轻的下压式推近；不追随画外高处的毛线球。",
+      "continuity": "承接 Shot 06 的猫先下坠；毛线球仍在画外上方，不得提前出现在篮内或咪布爪中。Shot 08 保持同侧篮沿机位，球从正上方垂直落入。",
+      "line_art": "Use case: illustration-story. Asset type: contour-only storyboard line art for Shot 07. Locked 16:9. FRAME SETUP: front entrance-side view slightly above the rim of one upright wide woven basket on the right half of the low daybed, basket two-thirds full of pale clothes, open negative space above; compact Mibu arriving from upper left. ACTION PATH: START Mibu descends into the open rim; PROCESS clothes compress and bulge while basket stays upright; END his dizzy head and two forepaws emerge at center, ears slightly uneven. REPRESENTATIVE FREEZE: freeze the final emerging-head pause, same round blue-white face, amber eyes, pink nose and bow tie readable; body remains buried in clothes, yarn ball not yet visible. CAMERA: fixed 50mm slightly high rim view with a tiny physical press-in after landing. CONTINUITY: Mibu lands first, ball remains above frame, basket and daybed fixed. CONTOUR ONLY: thin sparse outlines, depth by overlap, no shadows, gray, hatching, fabric texture, fur rendering, sunlight, impact clouds or decorative effects. AVOID: overturned basket, spilled body, yarn ball appearing early, extra paws or tails, duplicate cat, missing bow tie, stars around head, text, arrows or labels.",
+      "style_notes": "落点要柔软但结构清楚；眩晕靠耳朵和眼神，不画星星。",
+      "final_prompt": "",
+      "video_prompt": {
+        "seedance2": "同一卧室右侧休憩榻的正面斜俯中近景，一只宽口浅棕编织篮直立在右半坐垫，约三分之二装满奶油和浅灰衣物，篮口上方留有空间。仍带灰白分区、耳朵、白爪边缘、尾巴和粉色薄荷绿蝴蝶结的咪布猫球从画面左上沿较低弧线先落入篮内，衣物明显下陷并向篮沿鼓起，但篮体不倾倒。短暂停顿后，咪布恢复成矮壮圆脸的英短蓝白猫形态，晕乎乎地从衣物中央冒出脑袋和两只前爪，耳朵略歪、琥珀眼发愣并停住；毛线球此时仍在画外上方。摄影机用 50mm 略高于篮沿的固定机位，落地后极轻推近。禁止篮子翻倒、毛线球提前出现、额外肢体、眩晕星星、文字或新角色。",
+        "reference_frame": "",
+        "duration": "5s",
+        "primary_motion": "猫球落入衣物 -> 衣物下陷吸收冲击 -> 咪布晕乎乎冒头定住",
+        "camera_motion": "slightly high locked basket view with tiny press-in",
+        "preserve": [
+          "upright basket",
+          "pale clothes compress",
+          "Mibu lands before yarn ball",
+          "head and two forepaws emerge"
+        ],
+        "avoid": [
+          "basket overturn",
+          "early yarn ball",
+          "extra limbs",
+          "dizzy graphic symbols"
+        ],
+        "audio": "柔软衣物扑落声、篮身轻响与咪布短促晕眩呼气，不生成音乐",
+        "notes": "文本自包含，不依赖内部线稿或最终帧。"
+      },
+      "video_readiness": {
+        "status": "blocked_until_line_art_confirmed",
+        "first_frame_path": "",
+        "motion_intensity": "medium",
+        "camera_motion": "locked with tiny press-in",
+        "risk_level": "medium",
+        "must_preserve": [
+          "basket upright",
+          "Mibu first",
+          "ball still offscreen",
+          "identity after uncurling"
+        ],
+        "test_status": "not_started"
+      },
+      "output": "pending"
+    },
+    {
+      "id": "Shot 08",
+      "status": "script_ready",
+      "aspect_ratio": "16:9",
+      "duration": "5s",
+      "purpose": "回收最初的追球动机，用毛线球落头、双爪抱住和满足下沉完成喜剧闭环。",
+      "frame": "收纳篮边缘高度的正面近景，咪布居中从浅色衣物中露出圆脸、胸口、两只前爪和领结；篮口上方留出垂直落球通道，背景为柔焦的暖杏墙面和少量窗边绿植。",
+      "action": "起点：咪布晕乎乎定住，双爪搭在衣物上。过程：唯一毛线球从正上方落到他头顶，他抬起两只前爪接住并抱到胸前。落点：咪布露出安心满足的表情，抱球缓缓缩回衣物，最后只露出眼睛、耳朵和怀中毛线球。",
+      "camera": "85mm 篮沿高度正面静态近景，随咪布下沉做极慢短推，最后稳定停留一拍。",
+      "continuity": "承接 Shot 07 的同一篮子、衣物下陷、耳朵角度与画外上方毛线球；只有一颗球，从头顶转移到双爪之间，最终抱在胸口。",
+      "line_art": "Use case: illustration-story. Asset type: contour-only storyboard line art for Shot 08. Locked 16:9. FRAME SETUP: eye-level close view at the basket rim, Mibu centered among pale clothes with round blue-white face, amber-eye shapes, pink nose, chest, two forepaws and pink-and-mint bow tie readable; open vertical space above, soft bedroom background kept minimal. ACTION PATH: START dizzy Mibu rests paws on clothes; PROCESS the single mustard yarn ball drops vertically onto his head and he raises both forepaws to catch it; END he hugs it to his chest and sinks contentedly until only eyes, ears and held ball remain. REPRESENTATIVE FREEZE: freeze the catch just after the ball leaves the top of his head and settles between both paws, satisfied expression beginning, one cat and one ball only. CAMERA: locked 85mm frontal rim-height close view with an extremely slow physical push as he sinks. CONTINUITY: same basket, compressed clothes, bow tie centered, ball transfers head to paws without duplication. CONTOUR ONLY: thin clean sparse outlines on white, overlap only, no shadow, gray fill, hatching, fur or cloth texture, sunlight glow, hearts, stars or decorative polish. AVOID: two balls, ball simultaneously on head and paws, extra limbs, missing bow tie, different cat, basket move, text, arrows, labels, logo or end card.",
+      "style_notes": "收尾依靠表情、抱球和缓慢下沉；不使用爱心、字幕或结尾卡。",
+      "final_prompt": "",
+      "video_prompt": {
+        "seedance2": "同一收纳篮边缘高度的正面近景，矮壮圆润的英短蓝白猫咪布居中从奶油与浅灰衣物中露出圆脸、胸口、两只前爪和粉色薄荷绿条纹蝴蝶结，灰蓝头背尾与白色口鼻胸腹四爪、琥珀眼和粉鼻保持一致。咪布晕乎乎地定住，唯一的芥末黄色毛线球从正上方垂直落到头顶；他抬起两只前爪把球接到胸前，眼神从发愣变成安心满足，抱着球缓缓缩回衣物，最后只露出眼睛、耳朵和怀中的毛线球。摄影机用 85mm 篮沿高度静态近景，随下沉极慢短推并停留一拍。禁止出现第二颗球、球同时在头顶与爪中、多余肢体、爱心星星、文字、片尾卡或篮子移位。",
+        "reference_frame": "",
+        "duration": "5s",
+        "primary_motion": "毛线球垂直落头 -> 咪布双爪接住抱胸 -> 满足地缩回衣物",
+        "camera_motion": "locked rim-height close view with very slow push",
+        "preserve": [
+          "single ball transfer",
+          "Mibu face and bow tie",
+          "same basket and clothes",
+          "contented landing state"
+        ],
+        "avoid": [
+          "duplicate ball",
+          "extra limbs",
+          "graphic hearts or stars",
+          "text or end card"
+        ],
+        "audio": "毛线球轻落、前爪抱球的细碎衣物声和满足呼噜声，不生成音乐",
+        "notes": "文本自包含，不依赖内部线稿或最终帧。"
+      },
+      "video_readiness": {
+        "status": "blocked_until_line_art_confirmed",
+        "first_frame_path": "",
+        "motion_intensity": "low",
+        "camera_motion": "very slow push-in",
+        "risk_level": "low",
+        "must_preserve": [
+          "single yarn ball",
+          "head-to-paws transfer",
+          "Mibu identity",
+          "same basket"
+        ],
+        "test_status": "not_started"
+      },
+      "output": "pending"
+    }
+  ],
+  "line_art": {
+    "status": "confirmed by user",
+    "rules": [
+      "线稿只锁结构、主体关系和空间层次，不画材质完成度。",
+      "只保留外轮廓、主体剪影、主要物体边界、地平线/消失点/少量透视辅助线。",
+      "不要阴影、投影、明暗面、灰度填充、排线、交叉排线、点描、纸纹、材质、光效和装饰细节。",
+      "背景保持白色或浅米白，不要大面积灰色；线条保持细、干净、稀疏。",
+      "线稿长边默认约 1536px，单张通常应低于约 1.5MB；超过时重跑 contour-only 版本。",
+      "透视敏感或连续镜头场景，要先写清固定锚点、机位关系和允许变化项，再出线稿。",
+      "默认用 parallel_generation worker queue 并行生成线稿；每张完成后保存路径、刷新 HTML，不回传 AI 审核。"
+    ],
+    "prompt_block": "GLOBAL LINE-ART LOCK — Generate eight independent 16:9 contour-only storyboard frames in exact Shot order. Use the user character sheet only to lock Mibu's identity: one stocky two-year-old blue-and-white British Shorthair, round amber eyes, pink nose, white muzzle/chest/paws, gray-blue head/back/tail, pink-and-mint striped bow tie. Use the warm home image only as future color/material inspiration; never copy its living-room layout. The authoritative original bedroom geography is bed at left, oatmeal rug and chair center, paired slippers then leaning cushion ramp, low daybed and upright woven clothes basket at right; all main horizontal motion runs left to right from the entrance side of the axis. Each frame freezes one representative instant only. Thin sparse clean black contours on white, depth by overlap and minimal perspective lines. No shadows, gray fills, hatching, crosshatching, stipple, texture, fur rendering, material rendering, light beams, motion blur, speed spirals, arrows, captions, labels, readable text, watermarks, decorative polish, extra characters, duplicated props or multi-pose action collage. Preserve one mustard yarn ball, permanent slipper displacement after Shot 05, soft cushion deformation, upright basket, and recognizable Mibu features while curled.",
+    "gallery": [
+      {
+        "shot_id": "Shot 01",
+        "label": "Shot 01 Line Draft",
+        "path": "assets/shot01-line.jpg",
+        "note": "saved for user review; registered JPG 1536x864"
+      },
+      {
+        "shot_id": "Shot 02",
+        "label": "Shot 02 Line Draft",
+        "path": "assets/shot02-line.jpg",
+        "note": "saved for user review; registered JPG 1536x864"
+      },
+      {
+        "shot_id": "Shot 03",
+        "label": "Shot 03 Line Draft",
+        "path": "assets/shot03-line.jpg",
+        "note": "saved for user review; registered JPG 1536x864"
+      },
+      {
+        "shot_id": "Shot 04",
+        "label": "Shot 04 Line Draft",
+        "path": "assets/shot04-line.jpg",
+        "note": "saved for user review; registered JPG 1536x864"
+      },
+      {
+        "shot_id": "Shot 05",
+        "label": "Shot 05 Line Draft",
+        "path": "assets/shot05-line.jpg",
+        "note": "saved for user review; registered JPG 1536x864"
+      },
+      {
+        "shot_id": "Shot 06",
+        "label": "Shot 06 Line Draft",
+        "path": "assets/shot06-line.jpg",
+        "note": "saved for user review; registered JPG 1536x864"
+      },
+      {
+        "shot_id": "Shot 07",
+        "label": "Shot 07 Line Draft",
+        "path": "assets/shot07-line.jpg",
+        "note": "saved for user review; registered JPG 1536x864"
+      },
+      {
+        "shot_id": "Shot 08",
+        "label": "Shot 08 Line Draft",
+        "path": "assets/shot08-line.jpg",
+        "note": "saved for user review; registered JPG 1536x864"
+      }
+    ]
+  },
+  "style_reference": {
+    "status": "applied to finished frames",
+    "borrow": [
+      "暖杏色低饱和墙面、蜂蜜色浅木、奶油与燕麦棉麻织物、少量自然绿植。",
+      "普通卧室尺度内的大面积温暖斜射自然光、柔和高光和安静舒适的真实居家气质。"
+    ],
+    "avoid": [
+      "不复制原图客厅布局、挑高窗、茶几、沙发造型、植物数量或家具位置。",
+      "避免过度 HDR、概念设定图感、橙色滤镜过重、杂乱装饰、品牌、可读文字或不真实豪宅尺度。"
+    ],
+    "structure_must_stay": [
+      "完成画面保持已确认线稿的构图、动作冻结点、卧室左右关系、家具锚点、角色身份与道具状态。",
+      "风格参考只映射暖杏色、浅木、奶油织物、真实材质与晨间自然光，不复制原图客厅布局。"
+    ],
+    "assets": [
+      {
+        "label": "暖阳居家风格参考（非场景图）",
+        "path": "assets/reference-style-warm-sunlight.png",
+        "note": "仅借色温、自然光、浅木和棉麻材质倾向；不锁布局。"
+      }
+    ]
+  },
+  "final_generation": {
+    "status": "ready for user review",
+    "prompt_strategy": "每镜以已确认线稿锁构图和动作，以咪布角色设定图锁身份，以暖阳居家图仅锁色温、自然光、浅木和棉麻材质；使用内置图像模型生成真实栅格完成画面。",
+    "delivery_risks": [
+      "完成画面不得覆盖或改变已确认线稿的构图、镜头、动作冻结点和卧室地理。",
+      "角色设定图负责咪布身份；风格图仅负责色彩、材质和光线，不导入其客厅主体或布局。",
+      "如用户点名单镜问题，只检查并修复该 Shot，不批量重做其他画面。"
+    ],
+    "gallery": [
+      {
+        "shot_id": "Shot 01",
+        "label": "Shot 01 Final",
+        "path": "assets/shot01-final.jpg",
+        "note": "saved for user review; registered JPG 2048x1152"
+      },
+      {
+        "shot_id": "Shot 02",
+        "label": "Shot 02 Final",
+        "path": "assets/shot02-final.jpg",
+        "note": "saved for user review; registered JPG 2048x1152"
+      },
+      {
+        "shot_id": "Shot 03",
+        "label": "Shot 03 Final",
+        "path": "assets/shot03-final.jpg",
+        "note": "saved for user review; registered JPG 2048x1152"
+      },
+      {
+        "shot_id": "Shot 04",
+        "label": "Shot 04 Final",
+        "path": "assets/shot04-final.jpg",
+        "note": "saved for user review; registered JPG 2048x1152"
+      },
+      {
+        "shot_id": "Shot 05",
+        "label": "Shot 05 Final",
+        "path": "assets/shot05-final.jpg",
+        "note": "saved for user review; registered JPG 2048x1152"
+      },
+      {
+        "shot_id": "Shot 06",
+        "label": "Shot 06 Final",
+        "path": "assets/shot06-final.jpg",
+        "note": "saved for user review; registered JPG 2048x1152"
+      },
+      {
+        "shot_id": "Shot 07",
+        "label": "Shot 07 Final",
+        "path": "assets/shot07-final.jpg",
+        "note": "saved for user review; registered JPG 2048x1152"
+      },
+      {
+        "shot_id": "Shot 08",
+        "label": "Shot 08 Final",
+        "path": "assets/shot08-final.jpg",
+        "note": "saved for user review; registered JPG 2048x1152"
+      }
+    ]
+  },
+  "video_generation": {
+    "status": "aggregate prompt ready",
+    "input_mode": "text_only",
+    "target_models": [
+      "Seedance 2.0"
+    ],
+    "prompt_strategy": "线稿确认后生成合并版提示词。前置区固定写主体、场景、音乐；后面按 Shot 顺序写每个镜头的画面、动作、镜头运动和可见变化。脚本阶段保留建议时长，但平台直贴提示词不写时长和画幅。",
+    "rules": [
+      "每个镜头只写一个主要动作，不把多个时间段硬塞进单条短视频提示词。",
+      "合并版和逐镜提示词必须文本自包含：把已确认线稿中的环境/构图、起始状态、空间关系、动作路径、运镜、可见变化、落点和连续性翻译成文字，不要求用户上传或 @ 线稿、最终帧、分镜合成板或本地资产路径。",
+      "默认 input_mode 为 text_only，逐镜 reference_frame 保持空值；只有用户明确选择 image_guided 并确认实际上传图片时才填写。",
+      "显式图片引用只允许指向用户实际提供的产品、主体、角色、场景或风格参考，不得把内部生成的单镜分镜资产伪装成用户输入。",
+      "角色片必须继承 character_performance_lock：主体身份写清脸部年龄感、发型、服装剪影、关键道具和运动质感；动作写成起点 -> 过程 -> 落点。",
+      "角色图、动作视频、运镜视频和音频如果同时使用，必须分别写清参考职责，不能让动作参考覆盖角色身份或场景。",
+      "多镜头项目默认逐镜头生成视频提示词，不把所有镜头合成一条不可控长提示词。",
+      "商业片、产品片、运动片和其他冲击力导向项目，脚本阶段就要避免相邻镜头构图和运动过于相似。",
+      "每个视频提示词都必须有一个可见动作幅度，例如主体响应、镜头移动、灯光扫动、环境反应或最终锁定。",
+      "连续镜头或 sampled phases 默认按 one physical camera path 书写；景别变化优先解释为物理位移，不写无解释的焦段跳变。",
+      "平台直贴提示词不写时长和画幅；这些参数由用户在视频平台界面选择。",
+      "整片合并提示词必须用固定前置区。若提供角色设定和场景图：主体:@对应的角色设定图；场景:@对应的场景图；音乐:不要生成任何背景音乐和旋律，只需要生成场景及动作对应的音效。若未提供：主体:Codex 生成角色设定描述；场景:Codex 生成场景描述；音乐同上。",
+      "整片合并提示词必须按顺序逐个覆盖所有 Shot，并为每个 Shot 写清环境/构图、主体动作、镜头运动和可见运动变化，不能只列镜头名称。",
+      "保持 session 轻量：JSON/HTML 只记录结构、提示词和本地文件路径，不记录内联图片数据、完整聊天历史或大段生成日志。",
+      "线稿确认后生成合并版提示词；默认按 Shot 顺序处理，不设单镜测试关口。"
+    ]
+  },
+  "video_test": {
+    "status": "optional",
+    "shot_selection": "默认不指定优先镜头；用户需要平台小测时自行选择，或另行要求建议。",
+    "why_this_shot": "无默认优先镜头。",
+    "pass_criteria": [
+      "可选检查项：角色不漂移、透视不漂移、动作不超载、风格一致。"
+    ],
+    "next_action": "线稿确认和合并版提示词完成后即可交付；平台小测不是默认流程关口，AI 不默认审核测试结果。"
+  },
+  "aggregate_video_prompt": "主体:@对应的角色设定图\n场景:@对应的场景图\n音乐:不要生成任何背景音乐和旋律，只需要生成场景及动作对应的音效\n\n场景参考职责：只锁定暖杏色墙面、蜂蜜色浅木、奶油与燕麦棉麻织物、少量自然绿植和温暖晨光；不得复制参考图中的客厅、挑高窗、茶几、沙发或植物布局。实际场景是重新设计的原创卧室。\n\nShot 01 | 诱因建立：原创卧室的猫眼高度三分之四宽景，浅木低床位于左后，燕麦色大地毯向右铺开，浅木椅、奶油拖鞋、软垫坡道和右侧休憩榻上的编织衣物篮沿追逐路线依次可见；咪布懒洋洋趴在左前景，身体朝右，目光停在床底阴影。唯一的芥末黄色毛线球从床底滚出并向右移动，咪布的琥珀眼和脑袋连续跟随，随后压低前身、收紧后腿，落在蓄势待发的姿态，毛线球仍在前方继续滚动。Camera: 摄影机保持在房间入口侧，以猫眼高度沿房间轴线缓慢短推，不横移，始终保留床左、篮右和完整路线。可见变化与落点：毛线球由床底进入明处并拉开距离，咪布由松弛趴卧转为压低蓄势；左后上方晨光方向、角色花色、领结和唯一毛线球保持稳定。音效只保留毛线轻擦地毯、细微项圈声和安静室内环境声。\n\nShot 02 | 沿床追逐：同一卧室的地毯高度侧面中宽景，床沿形成上方水平线，床尾右脚清楚位于内侧路线前方；咪布从左侧蓄势起跑，唯一的毛线球在右侧领先约一个猫身。咪布蹬地沿床边向右加速，视线始终锁住毛线球；毛线球从床脚外侧绕过，咪布走更贴近床脚的内线，最终冲到床脚前、肩侧已来不及完全避让，毛线球则越过床脚继续领先。Camera: 摄影机在入口侧贴近地毯向右平稳侧移，与咪布近似同速，始终保持球在前、猫在后、床脚处于路径上。可见变化与落点：咪布由蓄势转为高速前冲，蝴蝶结仅轻微摆动；运动轴继续左向右，床脚、角色身份和球的数量不得变化。音效只保留短促蹬地声、爪垫擦过地毯声和毛线滚动声。\n\nShot 03 | 擦撞蜷缩：同一床尾前方的三分之二中景，浅木床尾右脚固定在画面中左，咪布从左后方沿内线冲入，唯一的毛线球已在右前方继续滚走。咪布肩侧轻擦床脚，前冲动量带动身体转动；他下意识以前爪抱住尾巴并收拢四肢，最终蜷成圆滚滚的猫球，仍能辨认灰蓝与白色花区、双耳、白爪边缘、尾巴和粉色与薄荷绿条纹蝴蝶结，并保留向右动量开始顺时针滚动。Camera: 摄影机固定在动作轴入口侧，碰撞瞬间只做极短物理后拉，不震屏、不越轴。可见变化与落点：咪布由奔跑姿态连续压缩成可辨识的猫球，并开始顺时针向右滚出；毛线球始终领先，床脚不移位。音效只保留轻微碰撞声、毛发与地毯摩擦声和咪布短促受惊叫声。\n\nShot 04 | 穿越椅腿：同一卧室稍高俯看的三分之四中宽景，浅木四腿椅居中，椅腿之间的通道清晰；唯一的毛线球已经到达椅子右侧，咪布猫球从左下方接近，右后景能看见仍并排未动的奶油拖鞋与软垫下缘。咪布保持顺时针旋转，从两条椅腿之间沿左向右路线完整滚过，最终从椅子右侧穿出并正对前方拖鞋，椅子没有被碰动。Camera: 摄影机保持在入口侧稍高位置，沿动作方向做短幅向右摇移，同时让椅子成为固定地理锚点。可见变化与落点：猫球从椅子左侧转移到右侧，滚动方向和身份特征不变；拖鞋必须仍处于并排初始状态，毛线球继续在前。音效只保留连续滚动摩擦声、轻微领结抖动声和从椅腿间掠过的空气声。\n\nShot 05 | 撞散拖鞋：入口侧贴地近中景，两只奶油色开口拖鞋并排位于前中景、鞋头朝右，中间窄缝只够小毛线球通过；厚方形软垫从右后方地毯斜搭至低矮休憩榻边。唯一的毛线球先穿过拖鞋窄缝到达坡道下缘，咪布猫球紧随其后撞中拖鞋；近镜头一只拖鞋外旋约六十度，另一只向右滑动并侧翻，咪布不停顿地继续顺时针滚向软垫下缘，散开的拖鞋留在身后。Camera: 摄影机先以贴地侧面固定机位看清毛线球穿缝和猫球撞击，再短幅向右跟随至坡道。可见变化与落点：拖鞋由整齐并排变为一只外旋、一只侧翻滑开，咪布落在坡道下缘附近并继续向右；拖鞋之后不得复位，毛线球仍保持领先。音效只保留毛线穿缝声、拖鞋受撞后的软质滑动与翻倒声、猫球滚动声。\n\nShot 06 | 软垫起跳：同一卧室右侧的低机位三分之二近景，厚软垫从左下地毯斜搭至右上休憩榻边，榻右半坐垫上的宽口浅棕编织篮装着浅色衣物；散开的拖鞋可留在左后景。唯一的毛线球先滚到软垫上段，咪布猫球从左下压上坡道；软垫在猫球重量下局部压缩后回弹，将毛线球送入更高、更慢的弧线，同时咪布沿较低弧线从坡顶腾空，最终先朝篮口下坠，毛线球仍在其上方继续上升或停留在高弧顶点。Camera: 摄影机从入口侧低位顺软垫短推并小幅上仰，让两条不同高度的运动弧线和篮口落点同时清楚。可见变化与落点：软垫留下局部凹痕但仍稳固搭住榻沿，咪布由滚动转为较低飞行弧线并先下坠，毛线球进入更高更慢的弧线；两者不得融合或复制。音效只保留软垫压缩回弹声、短促惊叫、空气掠过声和远处衣物轻响。\n\nShot 07 | 落入衣物篮：同一休憩榻的正面斜俯中近景，宽口浅棕编织篮直立在右半坐垫，约三分之二装满奶油与浅灰衣物，篮口上方保留空白空间；咪布猫球从画面左上沿较低弧线朝篮口落下，毛线球仍位于画外上方。咪布落入衣物，衣物明显下陷并向篮沿鼓起，篮体始终直立；短暂停顿后，他恢复为矮壮圆脸的英短蓝白猫形态，从衣物中央晕乎乎地冒出脑袋和两只前爪，耳朵略歪、琥珀眼发愣并定住。Camera: 摄影机略高于篮沿固定斜俯，落地后只做非常轻的下压式推近，不追随画外高处的毛线球。可见变化与落点：衣物由蓬松变为受压下陷，咪布由猫球恢复并以脑袋和双爪露出篮口；篮子不倾倒，毛线球不得提前进入篮内或咪布爪中。音效只保留柔软扑落声、篮身轻响、衣物挤压声和咪布短促晕眩呼气。\n\nShot 08 | 抱球收尾：同一收纳篮边缘高度的正面近景，咪布居中从已下陷的奶油与浅灰衣物中露出圆脸、胸口、两只前爪和胸前蝴蝶结，篮口上方留出垂直落球通道，背景只保留柔焦的暖杏墙面与少量窗边绿植。咪布晕乎乎地定住，双爪搭在衣物上；唯一的毛线球从正上方垂直落到他的头顶，他抬起两只前爪将球接到胸前，眼神由发愣变得安心满足，随后抱着球缓缓缩回衣物，最终只露出眼睛、耳朵和怀中的毛线球。Camera: 摄影机保持篮沿高度的正面静态近景，随咪布下沉做极慢短推，最后稳定停留。可见变化与落点：毛线球完成从头顶到双爪之间再到胸前的唯一连续转移，咪布以满足抱球的姿态缩入衣物；球不得在头顶和爪中同时出现，篮子与衣物状态保持承接。音效只保留毛线球轻落声、前爪抱球时的细碎衣物声和满足的呼噜声。\n\nGlobal continuity: 咪布始终是同一只两岁英短蓝白公猫，矮壮圆润、短腿、圆脸、大琥珀眼、粉鼻、灰蓝头背尾、白色口鼻胸腹与四爪，全程佩戴粉色与薄荷绿条纹蝴蝶结和细深色项圈；不得长毛化、尖脸化、变瘦、换花色、换眼色、丢失或换色领结。场景始终是原创卧室：浅木低床在左，燕麦色大地毯和四腿浅木椅居中，奶油拖鞋、软垫坡道、右侧低矮木框休憩榻及榻上编织衣物篮依次连接；场景参考只锁暖杏墙面、蜂蜜色浅木、奶油与燕麦棉麻织物及从左后上方斜射的温暖晨光，不复制原图客厅布局、挑高窗、茶几、沙发或植物布置。全片只有一颗芥末黄色毛线球，带清晰交叉缠绕纹路与短线头，不复制、不换色、不与咪布融合；撞击后的两只拖鞋保持一只外旋、一只侧翻滑开的状态，软垫始终以约三十度缓坡搭住榻沿并保留受压凹痕，衣物篮始终直立且衣物保持落猫后的下陷状态。所有主要水平动作维持画面左向右，摄影机始终位于房间入口侧，不跨越动作轴；阳光方向、家具左右关系、道具数量和受力后的状态不可跳变。禁止新增人物、第二只猫、其他宠物、额外毛线球、额外家具、奇幻特效、速度旋涡、动作箭头、撞击文字、眩晕星星、爱心、字幕、品牌、水印、片尾卡、肢体增减、双尾、身份漂移、穿模、道具自动复位、无动机的镜头越轴或复制参考图中的客厅空间。\n",
+  "storyboard_sheet": {
+    "label": "Final Frame Storyboard Sheet",
+    "path": "assets/storyboard-final-3col.jpg",
+    "note": "3-column stitched JPG storyboard sheet. Shot order preserved, original frame aspect ratio preserved, no crop, white background, Shot labels only."
+  },
+  "next_action": "请用户在 session.html 审阅 Shot 01–08 完成画面、最终画面合集图和整片合并视频提示词；如有问题只修复点名镜头。"
+}

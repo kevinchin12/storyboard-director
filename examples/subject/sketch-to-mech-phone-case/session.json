@@ -1,0 +1,908 @@
+{
+  "project_title": "从草图到机甲手机壳",
+  "project_title_en": "Sketch to Mech Case",
+  "project_summary": "一条高级工业产品短片：设计师在洁净工作台上绘制机甲手机壳，最后一笔闭合后，二维图纸沿原有线条逐层隆起并成为真实产品；随后通过整体首秀、边框与接口微距、支架机构和可逆爆炸拆装，完成从创意草图到真实成品落地的表达。",
+  "workflow_mode": "prompt_control_no_ai_review",
+  "aspect_ratio": "16:9",
+  "display_options": {
+    "show_final_frames": true,
+    "show_storyboard_sheet": true,
+    "show_visual_references": true,
+    "show_durations": false,
+    "show_text_review": false
+  },
+  "parallel_generation": {
+    "enabled": true,
+    "multi_agent_required": true,
+    "state_writer": "orchestrator_only",
+    "dispatch_policy": "mandatory_for_independent_batches",
+    "dispatch_mode": "reduced_concurrency",
+    "min_parallel_batch_size": 2,
+    "max_line_art_workers": 4,
+    "max_final_frame_workers": 2,
+    "reduced_concurrency_reason": "Exact product identity and tight cross-shot continuity; limit to two final-frame workers.",
+    "worker_input": [
+      "session_path",
+      "assets_dir",
+      "project_mode",
+      "aspect_ratio",
+      "compact_production_reference",
+      "style_rules_when_needed",
+      "shot_id",
+      "prompt_text",
+      "reference_image_paths",
+      "target_output_path"
+    ],
+    "worker_output": [
+      "shot_id",
+      "asset_type",
+      "status",
+      "output_path",
+      "retry_prompt_if_failed",
+      "short_note"
+    ],
+    "rules": [
+      "线稿或最终帧批次中只要有 2 个及以上独立镜头，主 Agent 必须先创建 worker queue，再开始生图。",
+      "多 Agent 执行是默认必选项；使用本 skill 即视为默认允许独立生图 job 走子 Agent / worker delegation，除非用户明确要求串行。",
+      "生成前必须写入 dispatch_mode：multi_agent / reduced_concurrency / serial_unavailable。",
+      "只有当前环境没有可调用子 Agent / worker 能力，或工具策略阻止时，才能使用 serial_unavailable，并必须写清 reduced_concurrency_reason。",
+      "子 Agent 或串行 worker job 只负责生成图片并返回本地路径。",
+      "子 Agent 不改 session.json，不渲染 HTML，不重写脚本，不做图后审核。",
+      "主 Agent 按 worker 完成顺序串行合并结果、检查文件存在、写 JSON、刷新 HTML；HTML 展示顺序仍按 Shot 顺序。",
+      "所有 worker 必须使用 session.aspect_ratio；用户未指定时默认 16:9。",
+      "强身份一致性或连续空间项目可以把最终帧并发降到 1-2，但必须在 reduced_concurrency_reason 记录原因。"
+    ]
+  },
+  "project_mode": "subject",
+  "current_stage": "final",
+  "stages": [
+    {
+      "key": "outline",
+      "label": "01 Outline",
+      "description": "Idea intake and scope lock"
+    },
+    {
+      "key": "script",
+      "label": "02 Script",
+      "description": "Shot list, action, timing, continuity"
+    },
+    {
+      "key": "revision",
+      "label": "03 Revision",
+      "description": "Approved changes on same shot structure"
+    },
+    {
+      "key": "line-art",
+      "label": "04 Line Art",
+      "description": "Structure lock before style rendering"
+    },
+    {
+      "key": "style",
+      "label": "05 Style",
+      "description": "Reference extraction and limits"
+    },
+    {
+      "key": "final",
+      "label": "06 Final Scenes",
+      "description": "Final prompts, outputs, delivery checks"
+    }
+  ],
+  "outline": {
+    "status": "script package ready for approval",
+    "text": "干净高级的工作台上，一只手用制图笔完成手机壳设计图。最后一笔触发二维线稿沿原轮廓挤出，成为与参考图一致的黑灰机甲手机壳。产品进入棚拍展示，依次证明整体设计、侧边与底部细节、折叠支架功能和内部层级，最后重组落台形成英雄定格。",
+    "working_summary": "项目采用 subject 模式，以四张产品参考图控制手机壳身份、结构、材质分区和爆炸顺序。全片 8 镜、两个连续空间：Shot 01-03 为固定工作台；Shot 04-08 为由纸面亮度自然延展形成的浅灰产品台。"
+  },
+  "visual_references": {
+    "characters": [],
+    "scenes": [
+      {
+        "label": "Product Rear Identity",
+        "path": "assets/reference-product-rear.png",
+        "description": "控制完整后视轮廓、左上三摄护框、不对称机械背板、中央磁环、6 点位纵向 MECH-01 支架、螺钉与黑灰材质分区。"
+      },
+      {
+        "label": "Product Exploded Construction",
+        "path": "assets/reference-product-exploded.png",
+        "description": "控制部件数量、相对比例、孔位、朝向和拆装顺序：手机、TPU 内框、PC 硬背板、磁吸组件、合金支架、螺丝/衬套、装饰面板、外层防护框。"
+      },
+      {
+        "label": "Product Bottom Detail",
+        "path": "assets/reference-product-bottom.png",
+        "description": "控制中央 USB-C 加厚护圈、左右对称圆形声孔、底角防护块和底边厚度。"
+      },
+      {
+        "label": "Product Side Detail",
+        "path": "assets/reference-product-side.png",
+        "description": "控制侧边厚度、相机凸起、+/- 键、纹理功能键、三条斜纹、MECH-01 位置和下段开孔。"
+      }
+    ],
+    "usage_note": "四张图均为同一手机壳的产品参考，不是不同款式。参考图控制产品身份和结构；分镜脚本只控制构图、动作、机位、灯光状态和拆装阶段。"
+  },
+  "script": {
+    "status": "script package approved for line-art generation",
+    "review_notes": [
+      "用户已明确批准生成对应画面线稿。",
+      "8 镜完整 worker queue 已在首次生图前建立；多子代理只生成单镜图片并返回路径，主代理负责登记和渲染。",
+      "线稿阶段只生成 contour-only JPG，不生成彩色最终帧，不做默认 AI 图后审核。"
+    ],
+    "open_questions": []
+  },
+  "text_review": {
+    "status": "passed",
+    "mode": "text_only_pre_generation",
+    "rules": [
+      "只审脚本和提示词文本，不上传生成后的线稿做 AI 图像审核。",
+      "脚本确认前检查：镜头顺序、因果关系、动作连续性、机位动机、空间/角色/道具连续性。",
+      "线稿生成前检查：每个 line-art prompt 是否只要求轮廓线稿，是否锁定主体、场景、动作、构图、透视和不可漂移项。",
+      "如果文本审查发现会影响多个镜头的问题，先回到脚本修改，不进入生图。",
+      "如果只发现单个镜头的提示词风险，先改该镜头 line-art prompt，再进入并行生图。"
+    ],
+    "script_logic_check": {
+      "status": "passed",
+      "summary": "8 镜因果链完整：落笔建立 -> 图纸闭合 -> 线稿实体化 -> 成品首秀 -> 细节证明 -> 机构证明 -> 可逆拆装 -> 英雄落台。每镜只有一个主要动作，机位动机明确，相邻镜头无功能性重复。",
+      "blocking_issues": [],
+      "fixes_applied": [
+        "将绘制过程合并为两个可持续镜头，避免多个不能支撑独立时长的笔尖碎镜。",
+        "锁定 Shot 02-03 的顶视构图和图形重合，避免草图与实体无因果跳切。",
+        "在爆炸镜头前增加支架收平落点，并要求拆解后回到完全相同的封闭状态。",
+        "用高位建立、顶视跟笔、锁定转化、低位环绕、微距滑轨、机构近景、对称爆炸、英雄拉远区分相邻镜头语法。"
+      ]
+    },
+    "line_art_prompt_preflight": {
+      "status": "passed",
+      "summary": "修订后，8 条线稿提示词均显式映射 frame、完整起点到过程到落点动作、camera path、代表性单帧冻结点、前后镜连续性、参考图职责和专属避免项；8 条可见视频提示词均自包含画面构图、动作路径、焦段与运镜、材质或结构任务、连续性、禁止项和音效。",
+      "blocking_issues": [],
+      "fixes_applied": [
+        "逐镜加入 FRAME SETUP、ACTION PATH、REPRESENTATIVE FREEZE、CAMERA PATH、CONTINUITY LOCKS、REFERENCE DUTY、CONTOUR-ONLY RULES 和 AVOID。",
+        "线稿保留完整镜头语义，但明确只生成一个代表性冻结瞬间，禁止残影、箭头和多重状态。",
+        "将此前藏在 preserve、avoid、camera_motion 和 continuity 中的关键约束合并进 HTML 可见的 seedance2 提示词。",
+        "修正 Shot 05 的微距构图，使单帧冻结在底边成为主体的连续阶段，而不是把整条运动路径压成不可能的结构图。",
+        "澄清 Shot 07 的固定装配轴、拆解逆序、装配回归顺序、刚性层朝向、孔位贯通和材料分区。"
+      ]
+    }
+  },
+  "production_reference": {
+    "primary_anchor": [
+      "产品锚点：深枪灰/黑色机械装甲手机壳，修长矩形轮廓、厚实倒角护角、左上方高起伏三摄方形护框；背面为不对称机械切面与约四处可见紧固点。",
+      "磁环/支架锚点：中央偏下同轴圆形磁吸总成；铰链固定在圆环 6 点方向，窄长支撑臂沿纵向中轴向下，MECH-01 文字方向与支撑臂一致。",
+      "侧底锚点：侧边 + / - 长键、其下纹理功能键、三条浅色斜纹；底部中央 USB-C 加厚矩形护圈、左右对称圆形声孔和对称底角缓冲块。",
+      "材质锚点：TPU 为哑光细颗粒软质黑；PC 为烟灰半透明硬质结构；合金支架和装饰板为深枪灰喷砂/拉丝金属，倒角窄亮；磁环、螺丝和相机环有冷硬锐利高光。"
+    ],
+    "continuity_rules": [
+      "禁止镜像产品：后视图相机岛始终在左上，磁环不偏心，支架始终从 6 点位向下；相机开口、圆环和支架全程同向。",
+      "Shot 01-03 共用同一白纸、暖灰桌面、右侧入画手、左前柔光和顶视轴；Shot 03 实体与 Shot 02 完成图外轮廓严格重合，手在实体化后退出且不再出现。",
+      "Shot 04 的浅灰产品台由 Shot 03 的纸面亮度自然延展；Shot 04 结尾的产品朝向直接承接 Shot 05，允许变化仅为镜头距离、绕拍角度和移动高光。",
+      "Shot 06 结束时支架重新折回并与背板齐平；Shot 07 从这一完整封闭状态开始，拆解后必须恢复同一状态；Shot 08 承接同一成品落台。",
+      "爆炸与装配沿唯一前后深度轴进行，固定顺序为手机本体 -> TPU 减震内框 -> PC 硬质背板 -> 磁吸线圈组件 -> 合金支架组件 -> 金属螺丝与衬套 -> 装饰面板组件 -> 外层防护边框；不得漏件、重件、镜像或换序。",
+      "允许变化：产品角度、镜头距离、支架开合、组件间距、螺丝旋转和高光位置；禁止变化：产品比例、背板切面、孔位、按钮映射、护角厚度、材质类别和部件数量。"
+    ],
+    "world_lock": [
+      "两个空间均保持高级工业产品广告语汇：暖灰哑光桌面/浅灰无缝产品台、左前柔和冷白主光、右后窄轮廓光、低饱和黑灰色域和充足留白。",
+      "二维到三维只从既有制图线条隆起并获得厚度，不使用烟雾、粒子、液体、霓虹、全息 UI 或魔法光圈。",
+      "不添加额外人物、第二只手、文字卡、技术标注、引线、浮动 UI、虚构品牌、彩色灯光、脏污车间或赛博城市背景。"
+    ],
+    "video_asset_policy": [
+      "四张用户图片只控制产品结构、材质、比例、部件关系和细节位置，不锁定各镜头构图。",
+      "爆炸参考中的中文标签、引线和裸机 Apple 标识不得进入完成壳体；只使用可见产品结构信息。",
+      "线稿阶段仅锁轮廓、构图、动作和空间层次，不表现黑灰材质、透明度、高光或真实文字。",
+      "当前流程只到脚本包审批；批准后才并行生成线稿。最终彩帧默认不生成，除非用户明确要求。",
+      "所有资产保存在当前 session 的 assets/，JSON 和 HTML 仅记录项目相对路径。"
+    ],
+    "reference_assets": [
+      {
+        "label": "Rear Identity",
+        "path": "assets/reference-product-rear.png",
+        "role": "complete product identity and back construction"
+      },
+      {
+        "label": "Exploded Construction",
+        "path": "assets/reference-product-exploded.png",
+        "role": "component identity, order and assembly axis"
+      },
+      {
+        "label": "Bottom Detail",
+        "path": "assets/reference-product-bottom.png",
+        "role": "USB-C, speaker holes and bottom protection"
+      },
+      {
+        "label": "Side Detail",
+        "path": "assets/reference-product-side.png",
+        "role": "buttons, grip, thickness and side markings"
+      }
+    ]
+  },
+  "character_performance_lock": {
+    "identity_anchor": [
+      "唯一人体元素是一只无饰品的成人右手，干净自然指甲，炭灰色袖口，握黑色细杆制图笔；不出现脸、身体或第二只手。"
+    ],
+    "acting_path_rules": [
+      "手部动作只服务绘图：落笔 -> 稳定描线 -> 闭合最后一笔 -> 抬笔停顿 -> 向画面右侧退出。",
+      "允许变化为手指压力、笔尖位置、腕部角度和退出距离；禁止改变左右手、袖口、笔形或入画侧。"
+    ],
+    "reference_roles": [
+      "无独立人物参考图；手部是匿名操作主体，手机壳参考图不得被当成人物或固定构图参考。"
+    ],
+    "drift_risks": [
+      "避免多余手指、第二只手、首饰、彩色袖口、面孔或身体进入画面；避免手遮挡完整设计图。"
+    ]
+  },
+  "shots": [
+    {
+      "id": "Shot 01",
+      "status": "script_ready",
+      "aspect_ratio": "16:9",
+      "duration": "5s",
+      "purpose": "建立高级工作台空间、手与纸的关系，并给出创意起点。",
+      "frame": "暖灰哑光工作台高位斜俯宽景；白纸固定居中，细尺在左上，黑色制图笔由画面右下方进入，右手和炭灰袖口只占右侧边缘，背景留白干净。",
+      "action": "起点：纸面近乎空白，笔尖悬停在右下。过程：右手落笔，沿纸面画出手机壳外轮廓与左上相机护框。落点：半成稿已清晰建立，笔尖停在中央结构附近。",
+      "camera": "35mm 高位三分之四宽景，缓慢短距离推近；纸张四角和手的入画侧始终可读。",
+      "continuity": "建立 Shot 01-03 固定工作台：纸张中心、尺子左上、手从右侧进入、主光来自左前。下一镜切至同一纸面的顶视近景。",
+      "line_art": "Use case: illustration-story. Asset type: contour-only storyboard line-art for Shot 01. Locked 16:9. FRAME SETUP: premium warm-gray matte workbench, one centered white sheet with all four corners readable, slim ruler fixed upper left, one adult right hand with charcoal cuff entering from lower right holding a black technical pencil; foreground hand, midground paper, sparse background. ACTION PATH: START — pencil tip hovers above the lower-right paper area; PROCESS — the hand draws the phone-case outer silhouette and upper-left camera guard; END — a clear half-finished drawing remains and the pencil stops near the central structure. REPRESENTATIVE FREEZE: draw only the active half-finished state just before the pencil stops; one hand and one drawing state, no ghost poses or arrows. CAMERA PATH: start 35mm high three-quarter wide; make a short slow push; end slightly closer while paper corners, ruler, hand screen side and left-front key direction remain readable. CONTINUITY LOCKS: establishes the exact paper position, ruler position, right-side hand entry and drawing orientation used by Shot 02-03; allowed changes only pencil position and drawing completion. REFERENCE DUTY: product rear reference locks the outer silhouette and upper-left camera-guard geometry only, not composition or rendered materials. CONTOUR-ONLY RULES: thin sparse clean black contours on white; depth only by overlap; no shadow, gray fill, hatching, stipple, texture, material rendering, lighting effects or decorative polish. AVOID: extra hands, face or body, jewelry, mirrored case, complete product appearing early, readable text or logos, labels, arrows, captions, UI or technical overlays.",
+      "style_notes": "线稿仅锁工作台地理和半成稿轮廓。",
+      "final_prompt": "Use case: sketch-to-render / illustration-story. Asset type: final static storyboard frame for Shot 01. Input references: shot01-line.jpg is the authoritative composition, camera, hand placement and half-drawn-state lock; reference-product-rear.png controls only the phone-case design geometry being drawn. Primary request: Generate a final colored photoreal premium industrial-design film frame in locked 16:9. Real image-model raster output only. LOCKED STRUCTURE FROM LINE ART: 35mm high three-quarter wide view of a warm-gray matte workbench; centered natural white paper, slim ruler upper left, one adult right hand with clean nails and charcoal cuff entering lower right with a black technical pencil; freeze as the outer shell and upper-left camera guard are drawn and the pencil nears the central structure. Preserve one hand, one partial drawing state and ample clean negative space. STYLE TRANSLATION FROM TEXT LOCK: high-end industrial product commercial, soft cool-white key from left-front, subtle warm-gray grade, realistic paper fibers, restrained contact shadows, natural skin, premium optical depth, calm precision; drawing remains graphite/ink on paper, not a rendered product. IMPORTANT AVOID: do not change composition, handedness, paper/ruler positions or drawing orientation; no second hand, face, body, jewelry, complete product, readable ruler numerals, text, labels, logos, UI, neon, particles, clutter, concept-art finish or excessive HDR.",
+      "video_prompt": {
+        "seedance2": "暖灰哑光高级设计工作台，高位三分之四宽景；白纸居中且四角完整可见，细尺固定左上，一只炭灰袖口的成人右手从画面右下持黑色细杆制图笔入画。起点是笔尖悬停在纸面右下，随后落笔画出手机壳外轮廓与左上相机护框，最后停在中央结构附近，留下清晰半成稿。镜头使用 35mm 高位短距离慢推，纸张、尺子、右手入画侧和左前柔和冷白光保持固定。画面变化是空白纸面逐渐成为半成稿；只有纸张摩擦与制图笔描线声，不生成音乐。禁止第二只手、人物身体、文字卡和提前出现完整产品。",
+        "reference_frame": "",
+        "duration": "5s",
+        "primary_motion": "笔尖悬停 -> 落笔描出外框和相机护框 -> 停在半成稿",
+        "camera_motion": "high three-quarter slow push-in",
+        "preserve": [
+          "fixed paper layout",
+          "right hand and charcoal cuff",
+          "case outer silhouette",
+          "upper-left camera guard"
+        ],
+        "avoid": [
+          "extra hands",
+          "face or body",
+          "text overlays",
+          "completed product too early"
+        ],
+        "audio": "paper touch and precise pencil scratch, no music",
+        "notes": "该单镜提示词不依赖分镜图或最终帧上传。"
+      },
+      "video_readiness": {
+        "status": "blocked_until_line_art_confirmed",
+        "first_frame_path": "",
+        "motion_intensity": "low",
+        "camera_motion": "slow push-in",
+        "risk_level": "medium",
+        "must_preserve": [
+          "paper geography",
+          "handedness",
+          "screen side",
+          "partial drawing state"
+        ],
+        "test_status": "not_started"
+      },
+      "output": "pending"
+    },
+    {
+      "id": "Shot 02",
+      "status": "script_ready",
+      "aspect_ratio": "16:9",
+      "duration": "5s",
+      "purpose": "完成设计图，并用最后一笔建立二维转三维的可见触发。",
+      "frame": "同一白纸的正顶视近景，完整外轮廓居中；笔尖围绕中央磁环、6 点位纵向支架、机械背板切面、侧孔和螺钉位置工作，右手留在画面右缘。",
+      "action": "起点：承接半成稿。过程：笔尖补齐中央圆环、向下支架、机械背板和紧固点。落点：最后一笔闭合圆环，右手抬笔停在纸面右侧，完整平面设计图静止可读。",
+      "camera": "50mm 正顶视 macro insert，缓慢跟随笔尖，结尾锁定完整设计图。",
+      "continuity": "纸张、手、光向与 Shot 01 相同。产品后视方向固定：相机岛左上、磁环同轴、支架从 6 点位向下；Shot 03 必须复制结尾构图和图形尺度。",
+      "line_art": "Use case: illustration-story. Asset type: contour-only storyboard line-art for Shot 02. Locked 16:9. FRAME SETUP: exact same white sheet, ruler and right hand from Shot 01 in a top-down close view; complete case footprint centered with hand held at the right edge. ACTION PATH: START — continue from the half-finished drawing; PROCESS — add the concentric magnetic ring, six-o'clock downward stand, asymmetric mechanical backplate, reinforced corners, side openings and fastener positions; END — the final line closes the ring and the hand lifts the pencil to the paper's right side. REPRESENTATIVE FREEZE: draw only the instant the last line closes, with the full flat design visible and the hand beginning to lift; no alternate drawing states. CAMERA PATH: start 50mm locked overhead with a slight pencil follow; settle into a fully locked final crop; paper-edge crop, drawing scale and product orientation must become the exact Shot 03 start. CONTINUITY LOCKS: same sheet layout, right hand, light direction and screen side as Shot 01; camera island upper left, ring coaxial, stand at six o'clock pointing down; allowed change only drawing completion and pencil lift. REFERENCE DUTY: rear and side references lock geometry, side openings and fastener locations; do not copy logos, labels or tiny text. CONTOUR-ONLY RULES: thin sparse clean black contours on white; minimal drafting marks only; no shadow, gray fill, hatching, stipple, texture, material rendering, lighting effects or decorative polish. AVOID: mirrored product, early 3D thickness, annotations, arrows, readable text, UI, duplicate hands or missing product anchors.",
+      "style_notes": "完整设计图需与下一镜实体外轮廓严格重合。",
+      "final_prompt": "Use case: sketch-to-render / illustration-story. Asset type: final static storyboard frame for Shot 02. Input references: shot02-line.jpg is the authoritative overhead crop, complete flat-design geometry and hand freeze; reference-product-rear.png controls the exact case design. Primary request: Generate a final colored photoreal premium industrial-design film frame in locked 16:9. Real image-model raster output only. LOCKED STRUCTURE FROM LINE ART: strict 50mm overhead close view of the same paper and right hand; full flat case design centered with camera island upper left, concentric magnetic ring, six-o'clock downward stand, asymmetric plates, reinforced corners, side openings and fastener positions; freeze at the final ring-closing stroke as the pencil begins to lift at frame right. No 3D thickness yet. STYLE TRANSLATION FROM TEXT LOCK: warm-gray matte workbench, natural white paper, precise dark graphite/technical-pen lines, soft cool-white left-front key, realistic hand and charcoal cuff, controlled shadows and crisp drafting clarity. IMPORTANT AVOID: preserve the exact Shot 01 paper/ruler/light/hand continuity and locked crop for Shot 03; do not add 3D relief, duplicate lines as motion, annotations, arrows, readable text, ruler numbers, logos, UI, extra hands, glossy materials, neon or clutter.",
+      "video_prompt": {
+        "seedance2": "暖灰哑光工作台的正顶视近景，白纸居中、细尺固定左上；半成稿纵向放置，左上相机护框已经完成，炭灰袖口的成人右手持笔停在中央结构附近。笔尖依次补齐同轴磁环、固定在 6 点位并向下延伸的纵向支架、不对称机械背板、护角、侧孔与紧固点，最后一笔闭合圆环，右手抬笔停在纸面右侧。镜头使用 50mm 顶视近景轻微跟随笔尖，结尾完全锁定纸边裁切、图形尺度、左上相机岛和向下支架方向。画面变化是半成稿成为完整平面设计图；只有铅笔描线和抬笔摩擦声，不生成音乐。禁止标注、UI、镜像和提前三维化。",
+        "reference_frame": "",
+        "duration": "5s",
+        "primary_motion": "补齐结构 -> 闭合最后一笔 -> 抬笔停顿",
+        "camera_motion": "top-down pencil follow then lock-off",
+        "preserve": [
+          "same paper",
+          "camera island upper left",
+          "coaxial ring",
+          "stand at six o'clock"
+        ],
+        "avoid": [
+          "mirrored product",
+          "unreadable annotations",
+          "extra hand",
+          "3D material before the last line"
+        ],
+        "audio": "precise graphite scratch and pencil lift, no music",
+        "notes": "结尾锁定顶视裁切与产品尺度，供连续转化使用。"
+      },
+      "video_readiness": {
+        "status": "blocked_until_line_art_confirmed",
+        "first_frame_path": "",
+        "motion_intensity": "low",
+        "camera_motion": "top-down follow",
+        "risk_level": "high",
+        "must_preserve": [
+          "complete drawing geometry",
+          "paper scale",
+          "overhead axis",
+          "final pen position"
+        ],
+        "test_status": "not_started"
+      },
+      "output": "pending"
+    },
+    {
+      "id": "Shot 03",
+      "status": "script_ready",
+      "aspect_ratio": "16:9",
+      "duration": "5s",
+      "purpose": "完成核心视觉转折：同一张二维设计图在原位置成为真实产品。",
+      "frame": "与 Shot 02 结尾严格相同的正顶视构图；完整设计图居中，手在纸面右侧，现有制图线条沿自身轮廓形成浅层高度。",
+      "action": "起点：完整平面线稿静止。过程：既有线条增厚并逐层隆起，圆环、护角、相机框和背板获得真实厚度；手向右退出。落点：黑灰实体手机壳完整落在原图轮廓上，位置与朝向不变。",
+      "camera": "50mm 锁定正顶视，不绕拍、不变焦；只允许极轻微物理推近强调厚度形成。",
+      "continuity": "与 Shot 02 共用相机轴、纸张位置、外轮廓尺度、相机岛左上和支架向下。转换只能来自既有线条，不添加粒子、烟雾、液体、霓虹或 UI。",
+      "line_art": "Use case: illustration-story. Asset type: contour-only storyboard line-art for Shot 03. Locked 16:9. FRAME SETUP: exact Shot 02 final overhead crop, paper-edge crop, drawing scale, product orientation and hand position; full flat design centered. ACTION PATH: START — complete flat line drawing lies still; PROCESS — existing lines thicken and rise in order through the upper-left camera guard, corners, asymmetric backplate, coaxial ring and six-o'clock downward stand while the right hand retreats; END — the real case lands exactly over the original outline without changing position, scale or orientation. REPRESENTATIVE FREEZE: draw only the shallow-relief midpoint with the right hand already withdrawing near frame right; one product state, no flat/finished duplicates. CAMERA PATH: locked 50mm overhead with only a minimal physical push; no orbit, zoom or reframing. CONTINUITY LOCKS: identical paper geometry and axis to Shot 02; raised contours remain registered to the drawing beneath; allowed changes only relief height, hand exit distance and component depth. REFERENCE DUTY: rear, side and bottom references lock every raised component and forbid redesign. CONTOUR-ONLY RULES: thin sparse clean black contours on white; show depth only by overlap and doubled edge contours; no shadow, gray fill, hatching, stipple, texture, material rendering or lighting effects. AVOID: smoke, particles, liquid, neon, holographic UI, generic morph, new product geometry, camera movement, extra hands, ghost poses, arrows, labels or readable text.",
+      "style_notes": "线稿冻结在浅浮雕阶段，便于读清转化因果。",
+      "final_prompt": "Use case: sketch-to-render / illustration-story. Asset type: final static storyboard frame for Shot 03. Input references: shot03-line.jpg is the authoritative identical overhead crop and shallow-relief action freeze; reference-product-rear.png and reference-product-side.png control the emerging product geometry and thickness. Primary request: Generate a final colored photoreal premium industrial-design film frame in locked 16:9. Real image-model raster output only. LOCKED STRUCTURE FROM LINE ART: copy Shot 02 paper crop, drawing scale and orientation exactly; freeze at the shallow-relief midpoint where existing drawing lines alone gain physical height into the upper-left camera guard, corners, asymmetric backplate, coaxial ring and downward stand; the right hand is withdrawing at frame right. Show one transforming object registered precisely over its flat drawing, not separate flat and finished copies. STYLE TRANSLATION FROM TEXT LOCK: photoreal practical-magic product transformation, warm-gray desk, cool-white left key, realistic paper fibers, emerging matte black TPU, smoky hard PC and gunmetal edges appearing only on raised areas, subtle contact shadows and restrained material response. IMPORTANT AVOID: no camera change, generic morph, smoke, particles, liquid, neon, holographic UI, duplicate products, redesigned components, extra hands, text, logos or detached floating parts.",
+      "video_prompt": {
+        "seedance2": "正顶视近景中，完整手机壳线稿纵向居于白纸中央：相机护框位于左上，中央为同轴磁环，支架从 6 点位沿纵轴向下；成人右手抬笔停在纸面右侧。线稿静止后，只有既有制图线条逐层增厚隆起，依次形成相机护框、护角、机械背板、同轴磁环与纵向支架，最终成为与纸上线稿位置、比例和朝向完全重合的深枪灰黑色实体，右手同步退出画面右侧。镜头使用 50mm 锁定正顶视，仅极轻物理推近，不绕拍、不变焦。画面变化是平面线稿经过浅浮雕阶段成为真实产品；只有纸纤维、材料伸展和落位声，不生成音乐。禁止烟雾、粒子、液体、霓虹、全息 UI 或泛化变形。",
+        "reference_frame": "",
+        "duration": "5s",
+        "primary_motion": "平面线稿 -> 浅浮雕 -> 完整实体落位",
+        "camera_motion": "locked overhead with minimal physical push",
+        "preserve": [
+          "exact drawing overlap",
+          "camera island upper left",
+          "ring and stand axis",
+          "same paper geometry"
+        ],
+        "avoid": [
+          "generic morph",
+          "magic particles",
+          "new product design",
+          "camera orbit"
+        ],
+        "audio": "paper fiber, subtle material creak and seating tick, no music",
+        "notes": "该单镜提示词不依赖分镜图或最终帧上传。"
+      },
+      "video_readiness": {
+        "status": "blocked_until_line_art_confirmed",
+        "first_frame_path": "",
+        "motion_intensity": "medium",
+        "camera_motion": "locked overhead",
+        "risk_level": "high",
+        "must_preserve": [
+          "exact 2D-to-3D alignment",
+          "fixed axis",
+          "product identity",
+          "hand exit direction"
+        ],
+        "test_status": "not_started"
+      },
+      "output": "pending"
+    },
+    {
+      "id": "Shot 04",
+      "status": "script_ready",
+      "aspect_ratio": "16:9",
+      "duration": "5s",
+      "purpose": "确认真实成品的整体设计语言，并从工作台自然进入产品展示空间。",
+      "frame": "实体手机壳从纸面轻微升起，暖白纸面亮度延展为浅灰无缝产品台；产品以背面三分之四角度占据画面中心，完整相机护框、机械背板、磁环和收平支架均可见。",
+      "action": "起点：实体平躺纸上。过程：产品升起并缓慢转向背面三分之四角度，环境无缝化为浅灰产品台。落点：产品在完整英雄角度短暂停住，支架仍收平。",
+      "camera": "50mm 低位三分之四受控短轨道环绕，由顶视高度下降到产品高度；运动顺畅且不穿模。",
+      "continuity": "产品必须是 Shot 03 的同一实体，后视相机岛始终左上。Shot 04 结尾角度和旋转方向直接承接 Shot 05；灯光锁定左前冷白柔光、右后窄轮廓光。",
+      "line_art": "Use case: illustration-story. Asset type: contour-only storyboard line-art for Shot 04. Locked 16:9. FRAME SETUP: the exact finished case from Shot 03 rises above the sheet as the warm-white paper plane continuously expands into a minimal seamless product stage; product centered with open negative space. ACTION PATH: START — finished case lies flat on the paper; PROCESS — it rises and rotates toward a rear three-quarter view while the surface becomes the product stage; END — it pauses in a complete rear three-quarter hero orientation with stand folded flush. REPRESENTATIVE FREEZE: draw only the rising mid-turn state, with paper-to-stage continuity and the rear construction already readable. CAMERA PATH: start near the previous overhead height with a 50mm view; physically descend to product height while making a controlled short orbit; end in rear three-quarter framing with the same rotation direction that continues into Shot 05. CONTINUITY LOCKS: same product as Shot 03, camera island upper left, ring coaxial, asymmetric backplate readable, stand folded; left-front key and right-rear rim direction fixed; allowed changes only height, rotation angle and camera elevation. REFERENCE DUTY: rear reference locks complete identity; side reference locks thickness. CONTOUR-ONLY RULES: thin sparse clean black contours on white, depth by overlap only; no shadow, gray fill, hatching, stipple, texture, material rendering or light effects. AVOID: new showroom, hard environment cut, mirrored case, open stand, redesigned plates, hands, logos, text, labels, arrows, UI or extra products.",
+      "style_notes": "从纸面到产品台是有动机的亮度延展，不换成新场景。",
+      "final_prompt": "Use case: sketch-to-render / illustration-story. Asset type: final static storyboard frame for Shot 04. Input references: shot04-line.jpg is the authoritative rising three-quarter composition and paper-to-stage transition; reference-product-rear.png and reference-product-side.png control the exact finished case identity and thickness. Primary request: Generate a final colored photoreal premium industrial product-advertising frame in locked 16:9. Real image-model raster output only. LOCKED STRUCTURE FROM LINE ART: 50mm descending product-height view; freeze mid-rise as the same case rotates from paper toward a rear three-quarter hero angle, while the warm white paper plane continuously expands into a seamless light-gray product stage. Camera island remains upper left, magnetic ring coaxial, asymmetric backplates readable and stand folded flush. STYLE TRANSLATION FROM TEXT LOCK: premium studio photography, low-saturation graphite palette, soft cool-white key from left-front and narrow right-rear rim, matte granular TPU, smoky semi-transparent PC, satin gunmetal alloy, sharp restrained bevel highlights, realistic optical depth and contact shadow. IMPORTANT AVOID: do not replace the set with a new showroom, mirror or redesign the product, open the stand, flatten material differences, add logos, readable text, labels, UI, neon, smoke, particles or excessive HDR.",
+      "video_prompt": {
+        "seedance2": "完整深枪灰黑色机械装甲手机壳平躺在白纸中央，后背朝上，左上相机护框、中央同轴磁环、不对称机械背板和完全收平的向下支架清晰可见。产品从纸面平稳升起，缓慢转为后背三分之四英雄角度；暖白纸面亮度向四周连续延展为浅灰无缝产品台，不切换新空间。镜头使用 50mm，从顶视高度物理下降到产品高度并做受控短轨道环绕，结尾保持缓慢旋转趋势。画面变化是产品由平躺转为悬起并短暂停顿，核心结构完整可读；左前冷白柔光与右后窄轮廓光始终固定。只有升降机械与空气滑动声，不生成音乐。禁止镜像、打开支架或改变产品款式。",
+        "reference_frame": "",
+        "duration": "5s",
+        "primary_motion": "平躺实体 -> 升起转向 -> 三分之四英雄停顿",
+        "camera_motion": "descending low three-quarter orbit",
+        "preserve": [
+          "exact product identity",
+          "rear camera island upper left",
+          "folded stand",
+          "fixed left-front key light"
+        ],
+        "avoid": [
+          "new showroom",
+          "mirrored case",
+          "open stand",
+          "generic cyber case"
+        ],
+        "audio": "soft mechanical lift and air movement, no music",
+        "notes": "结尾保持产品缓慢旋转趋势。"
+      },
+      "video_readiness": {
+        "status": "blocked_until_line_art_confirmed",
+        "first_frame_path": "",
+        "motion_intensity": "medium",
+        "camera_motion": "controlled orbit",
+        "risk_level": "high",
+        "must_preserve": [
+          "product identity",
+          "orientation",
+          "stand state",
+          "background transition"
+        ],
+        "test_status": "not_started"
+      },
+      "output": "pending"
+    },
+    {
+      "id": "Shot 05",
+      "status": "script_ready",
+      "aspect_ratio": "16:9",
+      "duration": "5s",
+      "purpose": "用连续的边框微距证明按键、接口、护角和材质完成度。",
+      "frame": "浅灰产品台上的同一手机壳保持缓慢四分之一转动；近景从高起相机护框切入，沿侧边按键和纹理功能键向下，底部 USB-C 与双排声孔成为结尾主体。",
+      "action": "起点：承接 Shot 04 后背三分之四角度。过程：产品缓慢旋转，移动高光依次划过相机护框、+/- 键、纹理键、护角和侧边斜纹。落点：底部中央接口、左右声孔和底角保护在近景中清晰停住。",
+      "camera": "85mm macro 侧向滑轨，先沿侧边下移再顺势到达底边；浅景深但关键轮廓持续清晰。",
+      "continuity": "旋转方向承接 Shot 04。侧键映射、USB-C 居中、左右声孔和底角厚度以侧/底参考为准；不得消失、换位或增生接口。",
+      "line_art": "Use case: illustration-story. Asset type: contour-only storyboard line-art for Shot 05. Locked 16:9. FRAME SETUP: exact same case and stage from Shot 04 in a close side-to-bottom composition; raised camera lip and side rail lead toward the lower edge. ACTION PATH: START — continue the same rear three-quarter angle and rotation direction from Shot 04; PROCESS — an 85mm macro glide travels from camera guard down past plus/minus buttons, textured function button, reinforced corner and three diagonal marks; END — the centered USB-C guard, symmetric speaker holes and bottom corner blocks become the held focal area. REPRESENTATIVE FREEZE: draw only the late glide when the bottom edge is becoming dominant while enough side controls remain visible for path continuity; do not force the entire route into an impossible flat diagram. CAMERA PATH: 85mm shallow-depth side glide descending toward the bottom; end in a close bottom-detail hold while key contours remain readable. CONTINUITY LOCKS: same product orientation and turn direction as Shot 04; exact button mapping, port location, speaker-hole symmetry and case thickness; allowed changes only quarter-turn phase, camera position and focus landing. REFERENCE DUTY: side image locks buttons, grip and thickness; bottom image locks USB-C and perforations; rear image locks camera lip. CONTOUR-ONLY RULES: thin sparse clean black contours on white, depth by overlap only; no shadow, gray fill, hatching, stipple, texture, material rendering or lighting streaks. AVOID: missing or moved controls, extra ports, mirrored product, all-in-one orthographic diagram, labels, readable text, logos, arrows, UI or extra objects.",
+      "style_notes": "线稿只证明结构位置，不表现材质高光。",
+      "final_prompt": "Use case: sketch-to-render / illustration-story. Asset type: final static storyboard frame for Shot 05. Input references: shot05-line.jpg is the authoritative late side-to-bottom macro composition; reference-product-side.png and reference-product-bottom.png control button, grip, port, perforation and thickness geometry; reference-product-rear.png controls the camera lip identity. Primary request: Generate a final colored photoreal premium industrial product-detail frame in locked 16:9. Real image-model raster output only. LOCKED STRUCTURE FROM LINE ART: 85mm shallow-depth macro freeze late in the glide, with the bottom edge becoming the visual anchor while enough side rail remains to show the raised camera lip, plus/minus keys, textured function key, reinforced corner and diagonal marks; centered USB-C guard, symmetric circular speaker holes and bottom corner blocks must be exact. STYLE TRANSLATION FROM TEXT LOCK: precise product macro photography, cool-white moving edge highlight, warm-gray grade, clear separation of matte granular TPU, smoky semi-transparent PC, satin gunmetal alloy and cold hard metal bevels; crisp key contours with restrained depth of field. IMPORTANT AVOID: no moved or missing controls, extra ports, asymmetric speaker holes, mirrored product, glossy-plastic uniformity, impossible orthographic diagram, text, logos, labels, UI, fingerprints, dust, neon or overprocessing.",
+      "video_prompt": {
+        "seedance2": "浅灰无缝产品台上，完整手机壳悬浮于后背三分之四角度，支架完全收平，并沿固定方向缓慢完成四分之一转。镜头从左上高起相机护框沿侧边下移，依次掠过加减长键、纹理功能键、加厚护角和三条斜纹，最后停在底部中央 USB-C 护圈、左右对称声孔与底角缓冲块。镜头使用 85mm 浅景深微距侧向滑轨，关键轮廓持续清晰。移动高光清楚区分哑光细颗粒 TPU、烟灰半透明 PC、深枪灰喷砂或拉丝合金和冷硬金属倒角。只有塑胶摩擦与克制按键触感声，不生成音乐。按键、接口和孔位不得换位、消失或增生，禁止所有表面变成亮塑料。",
+        "reference_frame": "",
+        "duration": "5s",
+        "primary_motion": "相机护框 -> 侧边按键与护角 -> 底部接口停住",
+        "camera_motion": "85mm macro side-to-bottom glide",
+        "preserve": [
+          "button mapping",
+          "centered USB-C",
+          "symmetric speaker holes",
+          "corner thickness"
+        ],
+        "avoid": [
+          "missing controls",
+          "extra ports",
+          "mirroring",
+          "all surfaces becoming glossy plastic"
+        ],
+        "audio": "subtle polymer rub and tactile clicks, no music",
+        "notes": "该单镜提示词不依赖分镜图或最终帧上传。"
+      },
+      "video_readiness": {
+        "status": "blocked_until_line_art_confirmed",
+        "first_frame_path": "",
+        "motion_intensity": "medium",
+        "camera_motion": "macro side glide",
+        "risk_level": "high",
+        "must_preserve": [
+          "side controls",
+          "bottom port",
+          "speaker-hole symmetry",
+          "case thickness"
+        ],
+        "test_status": "not_started"
+      },
+      "output": "pending"
+    },
+    {
+      "id": "Shot 06",
+      "status": "script_ready",
+      "aspect_ratio": "16:9",
+      "duration": "4s",
+      "purpose": "通过一次完整开合证明磁环支架的功能与机械精度。",
+      "frame": "同一手机壳背面中央三分之四 macro 近景，圆形磁环和 6 点位铰链占据中心，纵向支撑臂与机械背板轮廓完整可读。",
+      "action": "起点：支架与背板齐平。过程：支撑臂从 6 点位铰链向外翻出并到位短暂停顿，再沿同一路径折回。落点：支架重新与背板齐平，为下一镜拆解恢复完整封闭状态。",
+      "camera": "85mm macro 锁定三分之四近景，机构打开时做极轻推近，折回时保持距离。",
+      "continuity": "磁环同轴、铰链位于 6 点位、支撑臂沿纵轴向下；只开合一次，不旋转磁环，不改变 MECH-01 位置。",
+      "line_art": "Use case: illustration-story. Asset type: contour-only storyboard line-art for Shot 06. Locked 16:9. FRAME SETUP: exact same product on the seamless stage in a tight rear three-quarter view; coaxial magnetic ring centered, hinge fixed at six o'clock, vertical arm extending down, backplate cuts and fasteners readable. ACTION PATH: START — stand lies folded flush; PROCESS — arm rotates outward on the single six-o'clock hinge, reaches its stop and pauses, then returns on the same path; END — stand is fully flush again for Shot 07. REPRESENTATIVE FREEZE: draw only the near-fully-open peak state, one stand position and one product body. CAMERA PATH: locked 85mm macro; use a very slight push during opening and hold distance for return; no ring orbit or camera-axis change. CONTINUITY LOCKS: ring remains coaxial, hinge and arm direction fixed, backplate and fasteners do not move; original engraving position and direction stay but no readable text is required; outgoing state is folded flush. REFERENCE DUTY: rear reference strictly locks ring, hinge, arm and surrounding plate geometry. CONTOUR-ONLY RULES: thin sparse clean black contours on white; no shadow, gray fill, hatching, stipple, texture, material rendering or lighting effects. AVOID: ring rotation, hinge relocation, multiple arms, ghost poses, motion arrows, changed fasteners, readable text, labels, UI, extra products or open-state carryover into Shot 07.",
+      "style_notes": "单帧冻结在接近完全打开的位置，不用残影解释动作。",
+      "final_prompt": "Use case: sketch-to-render / illustration-story. Asset type: final static storyboard frame for Shot 06. Input references: shot06-line.jpg is the authoritative tight rear three-quarter mechanism freeze; reference-product-rear.png controls the ring, hinge, stand arm, plate and fastener geometry. Primary request: Generate a final colored photoreal premium industrial mechanism frame in locked 16:9. Real image-model raster output only. LOCKED STRUCTURE FROM LINE ART: 85mm rear-center macro, concentric magnetic ring centered, hinge fixed at six o'clock, vertical support arm extending down; freeze near the fully opened peak with only one stand position. Preserve surrounding asymmetric backplate cuts and all fasteners; this is the visible peak of an action that ultimately folds flush before Shot 07. STYLE TRANSLATION FROM TEXT LOCK: precision mechanism photography, matte black polymer, smoky rigid PC, dark gunmetal ring and stand, narrow machined bevel highlights, cool-white left key, narrow right rim, realistic hinge contact and restrained shadows. IMPORTANT AVOID: no ring rotation or offset, hinge relocation, multiple arms, ghost poses, readable MECH-01 text, invented engraving, extra fasteners, mirrored case, labels, arrows, UI, neon, particles or glossy toy-plastic finish.",
+      "video_prompt": {
+        "seedance2": "浅灰产品台上的背面中央三分之四微距，完整手机壳悬浮，同轴磁环居中，支架铰链固定在磁环 6 点位，纵向支撑臂向下并与背板完全齐平，背板切面与紧固点清晰可见。支架沿唯一铰链向外翻至到位角并短暂停顿，再沿原路径折回，最终完全收平。镜头使用 85mm 锁定近景，仅在打开阶段极轻推近，折回时保持距离。画面变化是一次完整机械开合；只有铰链摩擦、到位卡嗒和回收声，不生成音乐。磁环不得旋转或偏心，不新增文字，禁止多重支架姿态。",
+        "reference_frame": "",
+        "duration": "4s",
+        "primary_motion": "支架收平 -> 向外翻出到位 -> 原路折回收平",
+        "camera_motion": "locked macro with subtle push-in",
+        "preserve": [
+          "coaxial ring",
+          "six-o'clock hinge",
+          "vertical arm",
+          "final folded state"
+        ],
+        "avoid": [
+          "ring rotation",
+          "hinge relocation",
+          "multiple stands",
+          "ending with stand open"
+        ],
+        "audio": "hinge friction and restrained mechanical clicks, no music",
+        "notes": "动作结束状态必须完全收平。"
+      },
+      "video_readiness": {
+        "status": "blocked_until_line_art_confirmed",
+        "first_frame_path": "",
+        "motion_intensity": "medium",
+        "camera_motion": "subtle push-in",
+        "risk_level": "high",
+        "must_preserve": [
+          "ring axis",
+          "hinge location",
+          "stand geometry",
+          "folded landing state"
+        ],
+        "test_status": "not_started"
+      },
+      "output": "pending"
+    },
+    {
+      "id": "Shot 07",
+      "status": "script_ready",
+      "aspect_ratio": "16:9",
+      "duration": "6s",
+      "purpose": "展示产品内部层级、材质关系和可逆装配精度。",
+      "frame": "浅灰产品台中央的完整手机壳与全部拆解层形成一条左下到右上的动态斜线；整组刚性系统在画面平面内顺时针倾斜约 12 度，拆解后各部件沿同一倾斜投影轴保持清楚间距，产品朝向、孔位、长边和圆环轴线彼此平行。",
+      "action": "起点：承接 Shot 06 的完整封闭成品。过程：外框、装饰板、螺丝/衬套、合金支架、磁吸组件、PC 背板、TPU 内框与手机依序分离，短暂停留后反向归位。落点：螺丝最后旋紧，产品恢复与起点完全相同的完整状态。",
+      "camera": "50mm 正面偏三分之四构图，机位做约 12 度顺时针 camera roll；爆炸轴在画面中由左下升向右上，镜头基本锁定，仅做极轻水平视差，不能变成俯视目录图。",
+      "continuity": "严格使用爆炸参考的部件身份与装配逻辑；整个产品与全部部件作为一个刚性组合统一倾斜，禁止单个零件独立翻面或随机旋转。所有部件平面互相平行，圆环共轴、相机开口同向；拆解前后产品姿态完全相同。",
+      "line_art": "Use case: illustration-story. Asset type: contour-only storyboard line-art for Shot 07. Locked 16:9. FRAME SETUP: exact folded complete case from Shot 06 and all exploded layers form one strong diagonal composition across the same seamless stage; the entire rigid assembly is rolled about 12 degrees clockwise in the image plane, and the projected separation axis rises from lower left to upper right. ACTION PATH: START — fully assembled product with stand flush; PROCESS — rigid layers separate along the single diagonal projected front-to-back axis in reverse assembly order, hold at readable spacing, then return along the same axis; END — layers seat, screws tighten last, and the product returns to the identical tilted start pose. Fixed assembly axis from back to front: phone body -> TPU inner frame -> PC hard backplate -> magnetic coil -> alloy ring/stand -> screws and spacers -> decorative plates -> outer protective frame. REPRESENTATIVE FREEZE: draw only maximum readable exploded spacing; every component plane stays parallel, same-facing and coaxial, with no independent rotation or flip. CAMERA PATH: 50mm front-biased three-quarter camera with a controlled 12-degree clockwise roll; essentially locked with only minimal horizontal parallax; avoid flat orthographic catalog layout. CONTINUITY LOCKS: camera opening stays upper left relative to the product, all holes register, magnetic elements remain coaxial, part count/order/orientation fixed; incoming and outgoing stand state folded flush. REFERENCE DUTY: current Shot 07 line art controls exact component count and spacing; exploded product reference controls identity, order, proportion and orientation; ignore labels, leader lines and phone logo. CONTOUR-ONLY RULES: thin sparse clean black contours on white, depth by overlap only; no shadow, gray fill, hatching, stipple, texture, material rendering or lighting effects. AVOID: horizontal catalog composition, random per-part rotation, missing or duplicate layers, flipped parts, melting, reordering, mirrored plates, labels, arrows, captions, readable text, logos, UI or diagram graphics.",
+      "style_notes": "单帧冻结在最大可读拆解间距，部件仍保持同轴和同向。",
+      "final_prompt": "Use case: sketch-to-render / illustration-story. Asset type: final static storyboard frame for Shot 07. Input references: shot07-line.jpg is the authoritative dynamic diagonal composition, component spacing and camera roll; reference-product-exploded.png controls exact component identity, count, order, proportion and orientation; reference-product-rear.png controls finished-case identity. Primary request: Generate a final colored photoreal premium industrial exploded-product frame in locked 16:9. Real image-model raster output only. LOCKED STRUCTURE FROM LINE ART: 50mm front-biased three-quarter view with the entire rigid assembly rolled about 12 degrees clockwise; projected exploded axis rises lower-left to upper-right. Freeze at maximum readable separation. Preserve fixed layers from back to front: phone body, TPU inner frame, PC hard backplate, magnetic coil, alloy ring/stand, screws and spacers, decorative plates, outer protective frame. Every component plane stays parallel, same-facing and coaxial; camera openings and holes register. STYLE TRANSLATION FROM TEXT LOCK: premium engineering product commercial, seamless light-gray stage, soft cool-white left-front key and narrow right-rear rim, matte soft-black TPU, smoky semi-transparent PC, deep gunmetal alloy, cold metallic screws and ring, controlled contact-free shadows and crisp mechanical edges. IMPORTANT AVOID: no horizontal catalog layout, per-part rotation, flip, melting, reordering, missing or duplicate parts, labels, leader lines, Chinese text, phone logo, UI, arrows, neon, particles, glossy-plastic uniformity or excessive HDR.",
+      "video_prompt": {
+        "seedance2": "浅灰无缝产品台前，支架完全收平的完整手机壳以正面偏三分之四角度悬浮；机位顺时针倾斜约 12 度，使产品与拆解轴共同沿左下至右上形成动态斜线。固定装配层级从后到前依次为手机本体、TPU 内框、PC 背板、磁吸线圈、合金圆环与支架、螺丝与衬套、装饰面板、外层防护边框；各层按逆装配顺序沿唯一倾斜投影轴刚性分离，在最大可读间距短暂停留，再完全反向归位，螺丝最后旋紧。镜头使用 50mm，基本锁定，仅做极轻水平视差。所有层面互相平行、朝向一致，不翻面、不单独旋转，左上相机开口、孔位和圆环始终共轴。只有机械滑动、磁吸定位、旋入与收口声，不生成音乐。禁止水平目录排列、漏件、重件、镜像、换序、融化和标签。",
+        "reference_frame": "",
+        "duration": "6s",
+        "primary_motion": "完整封闭 -> 同轴爆炸分离 -> 反向装配恢复完整",
+        "camera_motion": "locked symmetric three-quarter with minimal parallax",
+        "preserve": [
+          "component count and order",
+          "single depth axis",
+          "camera opening direction",
+          "identical start and end state"
+        ],
+        "avoid": [
+          "missing or duplicate layers",
+          "mirrored plates",
+          "floating labels",
+          "component melting"
+        ],
+        "audio": "mechanical slides, magnetic seating and screw impacts, no music",
+        "notes": "该单镜提示词不依赖分镜图或最终帧上传。"
+      },
+      "video_readiness": {
+        "status": "blocked_until_line_art_confirmed",
+        "first_frame_path": "",
+        "motion_intensity": "high",
+        "camera_motion": "minimal parallax track",
+        "risk_level": "high",
+        "must_preserve": [
+          "exact component order",
+          "rigid layers",
+          "shared orientation",
+          "reversible assembly"
+        ],
+        "test_status": "not_started"
+      },
+      "output": "pending"
+    },
+    {
+      "id": "Shot 08",
+      "status": "script_ready",
+      "aspect_ratio": "16:9",
+      "duration": "5s",
+      "purpose": "以完整成品英雄落台收束从创意到落地的主题。",
+      "frame": "重组完成的同一手机壳位于浅灰无缝产品台中央，背面主视角逐渐转为轻微三分之四；圆环、收平支架、相机护框、背板切面和四角保护清晰，背景留白充足。",
+      "action": "起点：Shot 07 重组完成的成品悬浮。过程：产品缓慢转向背面主视角，窄高光扫过烟灰边框、金属环和螺丝，并下降接近台面。落点：产品稳稳落台，镜头拉远后居中定格。",
+      "camera": "35mm 低位英雄角度，短轨道环绕接连续物理拉远，最后锁定对称宽景。",
+      "continuity": "必须是 Shot 07 结尾同一成品，支架保持收平，产品不镜像。只允许旋转角度、高光位置、下降距离和镜头距离变化。",
+      "line_art": "Use case: illustration-story. Asset type: contour-only storyboard line-art for Shot 08. Locked 16:9. FRAME SETUP: exact fully reassembled folded case from Shot 07 centered above the same seamless stage, open negative space, rear construction facing camera. ACTION PATH: START — complete product floats after assembly; PROCESS — it turns slowly toward the rear hero view and descends; END — it touches down, camera pulls wider, and the product locks centered in a symmetric final frame. REPRESENTATIVE FREEZE: draw only the instant of first contact with the stage in a low rear three-quarter hero pose; one product state, stand flush. CAMERA PATH: start low 35mm hero angle with a short controlled orbit; transition into one physical pullback; end in a stable symmetric wide hold. CONTINUITY LOCKS: same product and folded stand as Shot 07, camera guard upper left, coaxial ring, asymmetric backplate and reinforced corners fully readable; left-front key and right-rear rim direction fixed; allowed changes only rotation, descent and camera distance. REFERENCE DUTY: rear reference locks final identity; side reference locks thickness. CONTOUR-ONLY RULES: thin sparse clean black contours on white with one stage line; no shadow, gray fill, hatching, stipple, texture, material rendering, light streaks or decorative polish. AVOID: mirrored product, open stand, variant redesign, text card, logo reveal, labels, arrows, UI, extra products, hands or props.",
+      "style_notes": "最终线稿重结构与英雄轮廓，不做材质完成度。",
+      "final_prompt": "Use case: sketch-to-render / illustration-story. Asset type: final static storyboard frame for Shot 08. Input references: shot08-line.jpg is the authoritative low rear hero first-contact composition; reference-product-rear.png and reference-product-side.png control exact final identity and thickness. Primary request: Generate a final colored photoreal premium industrial hero frame in locked 16:9. Real image-model raster output only. LOCKED STRUCTURE FROM LINE ART: low 35mm rear three-quarter hero angle on the same seamless light-gray stage; freeze at the first stable contact with the surface after reassembly, product centered with strong negative space and the wider symmetric final framing already established. Camera guard remains upper left, magnetic ring coaxial, stand folded flush, asymmetric plates and reinforced corners fully readable. STYLE TRANSLATION FROM TEXT LOCK: high-end product advertising photography, low-saturation graphite palette, soft cool-white left-front key, narrow right-rear rim, realistic contact shadow, subtle moving highlight on smoky PC, matte TPU, satin gunmetal ring and cold metal fasteners, refined optical depth and restrained contrast. IMPORTANT AVOID: no open stand, mirrored or redesigned product, floating components, new props, text card, readable logo, UI, neon, particles, cyber background, glossy toy-plastic finish or excessive HDR.",
+      "video_prompt": {
+        "seedance2": "浅灰无缝产品台上，精确重组且支架完全收平的手机壳悬浮于后背三分之四角度，左上相机护框、中央同轴磁环、不对称背板与四角保护完整可见。产品缓慢转向后背主视并下降，窄高光依次扫过烟灰 PC 边框、机械背板、合金磁环与螺丝。镜头使用 35mm 低位英雄角，先做短轨道环绕，再连续物理拉远；产品稳稳落台，最终在对称宽景中居中锁定。画面变化是悬浮成品依次完成转向、下降、接触与静止；左前冷白柔光和右后窄轮廓光保持固定。只有空气滑动、轻金属共鸣和克制落台声，不生成音乐。禁止镜像、打开支架、换款、文字卡或 Logo 揭示。",
+        "reference_frame": "",
+        "duration": "5s",
+        "primary_motion": "完整悬浮 -> 缓慢转向与下降 -> 稳定落台英雄定格",
+        "camera_motion": "low hero orbit into physical pullback",
+        "preserve": [
+          "same assembled product",
+          "folded stand",
+          "camera island upper left",
+          "final centered symmetry"
+        ],
+        "avoid": [
+          "new product variant",
+          "open stand",
+          "mirroring",
+          "text card or logo reveal"
+        ],
+        "audio": "air movement and final restrained landing impact, no music",
+        "notes": "该单镜提示词不依赖分镜图或最终帧上传。"
+      },
+      "video_readiness": {
+        "status": "blocked_until_line_art_confirmed",
+        "first_frame_path": "",
+        "motion_intensity": "low",
+        "camera_motion": "hero orbit and pullback",
+        "risk_level": "medium",
+        "must_preserve": [
+          "final product identity",
+          "folded stand",
+          "orientation",
+          "stage and light direction"
+        ],
+        "test_status": "not_started"
+      },
+      "output": "pending"
+    }
+  ],
+  "line_art": {
+    "status": "line-art confirmed by user",
+    "rules": [
+      "线稿只锁结构、主体关系和空间层次，不画材质完成度。",
+      "只保留外轮廓、主体剪影、主要物体边界、地平线/消失点/少量透视辅助线。",
+      "不要阴影、投影、明暗面、灰度填充、排线、交叉排线、点描、纸纹、材质、光效和装饰细节。",
+      "背景保持白色或浅米白，不要大面积灰色；线条保持细、干净、稀疏。",
+      "线稿长边默认约 1536px，单张通常应低于约 1.5MB；超过时重跑 contour-only 版本。",
+      "透视敏感或连续镜头场景，要先写清固定锚点、机位关系和允许变化项，再出线稿。",
+      "默认用 parallel_generation worker queue 并行生成线稿；每张完成后保存路径、刷新 HTML，不回传 AI 审核。"
+    ],
+    "prompt_block": "Global line-art lock: 8 independent 16:9 contour-only storyboard frames. Use the four local product references only for exact product identity, component construction, side controls and bottom ports. Draw thin sparse black contours on white; depth only through overlap and doubled contour edges. No shadows, gray fills, hatching, cross-hatching, stipple, texture, material rendering, lighting effects, glow, readable text, logos, labels, arrows, captions, UI, technical overlays, duplicate products or extra hands. Shot 01-03 share one paper layout and right-side hand entry; Shot 02-03 share the exact overhead crop and case alignment. Shot 04-08 share one seamless product stage and light direction. Shot 07 uses one front-to-back exploded axis and the exact component order from the reference.",
+    "gallery": [
+      {
+        "shot_id": "Shot 01",
+        "label": "Shot 01 Line Draft",
+        "path": "assets/shot01-line.jpg",
+        "note": "saved for user review; registered JPG 1536x864"
+      },
+      {
+        "shot_id": "Shot 02",
+        "label": "Shot 02 Line Draft",
+        "path": "assets/shot02-line.jpg",
+        "note": "saved for user review; registered JPG 1536x864"
+      },
+      {
+        "shot_id": "Shot 03",
+        "label": "Shot 03 Line Draft",
+        "path": "assets/shot03-line.jpg",
+        "note": "saved for user review; registered JPG 1536x864"
+      },
+      {
+        "shot_id": "Shot 04",
+        "label": "Shot 04 Line Draft",
+        "path": "assets/shot04-line.jpg",
+        "note": "saved for user review; registered JPG 1536x864"
+      },
+      {
+        "shot_id": "Shot 05",
+        "label": "Shot 05 Line Draft",
+        "path": "assets/shot05-line.jpg",
+        "note": "saved for user review; registered JPG 1536x864"
+      },
+      {
+        "shot_id": "Shot 06",
+        "label": "Shot 06 Line Draft",
+        "path": "assets/shot06-line.jpg",
+        "note": "saved for user review; registered JPG 1536x864"
+      },
+      {
+        "shot_id": "Shot 07",
+        "label": "Shot 07 Line Draft",
+        "path": "assets/shot07-line.jpg",
+        "note": "saved for user review; registered JPG 1536x864"
+      },
+      {
+        "shot_id": "Shot 08",
+        "label": "Shot 08 Line Draft",
+        "path": "assets/shot08-line.jpg",
+        "note": "saved for user review; registered JPG 1536x864"
+      }
+    ],
+    "dispatch": {
+      "mode": "multi_agent",
+      "queue_built_before_generation": true,
+      "orchestrator_only_state_writer": true,
+      "jobs": [
+        {
+          "shot_id": "Shot 01",
+          "target": "assets/shot01-line.jpg",
+          "status": "completed"
+        },
+        {
+          "shot_id": "Shot 02",
+          "target": "assets/shot02-line.jpg",
+          "status": "completed"
+        },
+        {
+          "shot_id": "Shot 03",
+          "target": "assets/shot03-line.jpg",
+          "status": "completed"
+        },
+        {
+          "shot_id": "Shot 04",
+          "target": "assets/shot04-line.jpg",
+          "status": "completed"
+        },
+        {
+          "shot_id": "Shot 05",
+          "target": "assets/shot05-line.jpg",
+          "status": "completed"
+        },
+        {
+          "shot_id": "Shot 06",
+          "target": "assets/shot06-line.jpg",
+          "status": "completed"
+        },
+        {
+          "shot_id": "Shot 07",
+          "target": "assets/shot07-line.jpg",
+          "status": "completed"
+        },
+        {
+          "shot_id": "Shot 08",
+          "target": "assets/shot08-line.jpg",
+          "status": "completed"
+        }
+      ]
+    }
+  },
+  "style_reference": {
+    "status": "text style lock approved for final frames",
+    "borrow": [
+      "Photoreal premium industrial product advertising; real studio photography rather than concept art or software screenshots.",
+      "Shot 01-03 use a warm-gray matte design workbench, natural paper and soft cool-white left-front key; Shot 04-08 use one seamless light-gray product stage with narrow right-rear rim.",
+      "Low-saturation graphite palette; realistic optics, restrained reflections, subtle contact shadows and controlled depth of field.",
+      "Separate materials clearly: matte granular soft-black TPU, smoky semi-transparent rigid PC, satin/brushed deep-gunmetal alloy, cold hard metallic ring and fasteners."
+    ],
+    "avoid": [
+      "Do not introduce unrelated subjects, scenery, cyberpunk environments, neon, smoke, particles, liquid, floating UI, labels, text cards, readable brands or excessive HDR.",
+      "Do not flatten all materials into glossy plastic, redesign the case, mirror the camera island, move buttons or ports, or invent components."
+    ],
+    "structure_must_stay": [
+      "Each shotXX-line.jpg controls composition, camera, subject placement, representative action freeze and depth relationships.",
+      "Product references control identity and part geometry only; they never override approved line-art composition.",
+      "Camera island stays upper left in rear views, ring stays coaxial, stand hinge stays at 6 o-clock with arm down, and Shot 07 preserves the approved diagonal exploded layout."
+    ],
+    "assets": []
+  },
+  "final_generation": {
+    "status": "final frames and storyboard sheet ready for user review",
+    "prompt_strategy": "Generate each final raster frame from its approved shot line art plus only the necessary product reference images and the approved photoreal industrial-product text style lock. The style may change finish, color, material and light but cannot change composition, action freeze, camera or product identity.",
+    "delivery_risks": [
+      "确认风格参考不会覆盖已批准构图。",
+      "确认相邻镜头的角色、道具和光线逻辑一致。",
+      "确认最终图不是单张好运气，而是可复做的流程。",
+      "默认隐藏画面相关部分；启用后每张保存路径、刷新 HTML，交给用户在 HTML 中复核。"
+    ],
+    "gallery": [
+      {
+        "shot_id": "Shot 01",
+        "label": "Shot 01 Final",
+        "path": "assets/shot01-final.jpg",
+        "note": "saved for user review; registered JPG 2048x1152"
+      },
+      {
+        "shot_id": "Shot 02",
+        "label": "Shot 02 Final",
+        "path": "assets/shot02-final.jpg",
+        "note": "saved for user review; registered JPG 2048x1152"
+      },
+      {
+        "shot_id": "Shot 03",
+        "label": "Shot 03 Final",
+        "path": "assets/shot03-final.jpg",
+        "note": "saved for user review; registered JPG 2048x1152"
+      },
+      {
+        "shot_id": "Shot 04",
+        "label": "Shot 04 Final",
+        "path": "assets/shot04-final.jpg",
+        "note": "saved for user review; registered JPG 2048x1152"
+      },
+      {
+        "shot_id": "Shot 05",
+        "label": "Shot 05 Final",
+        "path": "assets/shot05-final.jpg",
+        "note": "saved for user review; registered JPG 2048x1152"
+      },
+      {
+        "shot_id": "Shot 06",
+        "label": "Shot 06 Final",
+        "path": "assets/shot06-final.jpg",
+        "note": "saved for user review; registered JPG 2048x1152"
+      },
+      {
+        "shot_id": "Shot 07",
+        "label": "Shot 07 Final",
+        "path": "assets/shot07-final.jpg",
+        "note": "saved for user review; registered JPG 2048x1152"
+      },
+      {
+        "shot_id": "Shot 08",
+        "label": "Shot 08 Final",
+        "path": "assets/shot08-final.jpg",
+        "note": "saved for user review; registered JPG 2048x1152"
+      }
+    ],
+    "dispatch": {
+      "mode": "reduced_concurrency",
+      "queue_built_before_generation": true,
+      "orchestrator_only_state_writer": true,
+      "concurrency": 2,
+      "reason": "Exact product identity and tight cross-shot continuity.",
+      "jobs": [
+        {
+          "shot_id": "Shot 01",
+          "target": "assets/shot01-final.jpg",
+          "status": "completed"
+        },
+        {
+          "shot_id": "Shot 02",
+          "target": "assets/shot02-final.jpg",
+          "status": "completed"
+        },
+        {
+          "shot_id": "Shot 03",
+          "target": "assets/shot03-final.jpg",
+          "status": "completed"
+        },
+        {
+          "shot_id": "Shot 04",
+          "target": "assets/shot04-final.jpg",
+          "status": "completed"
+        },
+        {
+          "shot_id": "Shot 05",
+          "target": "assets/shot05-final.jpg",
+          "status": "completed"
+        },
+        {
+          "shot_id": "Shot 06",
+          "target": "assets/shot06-final.jpg",
+          "status": "completed"
+        },
+        {
+          "shot_id": "Shot 07",
+          "target": "assets/shot07-final.jpg",
+          "status": "completed"
+        },
+        {
+          "shot_id": "Shot 08",
+          "target": "assets/shot08-final.jpg",
+          "status": "completed"
+        }
+      ]
+    }
+  },
+  "video_generation": {
+    "status": "aggregate prompt ready for review",
+    "input_mode": "text_only",
+    "target_models": [
+      "Seedance 2.0"
+    ],
+    "prompt_strategy": "Copy-ready video prompts are fully self-contained in text. Users upload only the four product reference images listed in the subject preface; no per-shot line-art or final-frame upload is required. Each Shot explicitly states composition, initial state, action path, camera relationship, visible change and continuity.",
+    "rules": [
+      "每个镜头只写一个主要动作，不把多个时间段硬塞进单条短视频提示词。",
+      "合并版提示词必须继承已确认线稿、角色设定图和场景图；没有提供参考图时，Codex 必须补写主体和场景描述。",
+      "角色片必须继承 character_performance_lock：主体身份写清脸部年龄感、发型、服装剪影、关键道具和运动质感；动作写成起点 -> 过程 -> 落点。",
+      "角色图、动作视频、运镜视频和音频如果同时使用，必须分别写清参考职责，不能让动作参考覆盖角色身份或场景。",
+      "多镜头项目默认逐镜头生成视频提示词，不把所有镜头合成一条不可控长提示词。",
+      "商业片、产品片、运动片和其他冲击力导向项目，脚本阶段就要避免相邻镜头构图和运动过于相似。",
+      "每个视频提示词都必须有一个可见动作幅度，例如主体响应、镜头移动、灯光扫动、环境反应或最终锁定。",
+      "连续镜头或 sampled phases 默认按 one physical camera path 书写；景别变化优先解释为物理位移，不写无解释的焦段跳变。",
+      "平台直贴提示词不写时长和画幅；这些参数由用户在视频平台界面选择。",
+      "整片合并提示词必须用固定前置区。若提供角色设定和场景图：主体:@对应的角色设定图；场景:@对应的场景图；音乐:不要生成任何背景音乐和旋律，只需要生成场景及动作对应的音效。若未提供：主体:Codex 生成角色设定描述；场景:Codex 生成场景描述；音乐同上。",
+      "整片合并提示词必须按顺序逐个覆盖所有 Shot，并为每个 Shot 写清环境/构图、主体动作、镜头运动和可见运动变化，不能只列镜头名称。",
+      "保持 session 轻量：JSON/HTML 只记录结构、提示词和本地文件路径，不记录内联图片数据、完整聊天历史或大段生成日志。",
+      "线稿确认后生成合并版提示词；默认按 Shot 顺序处理，不设单镜测试关口。"
+    ]
+  },
+  "video_test": {
+    "status": "optional",
+    "shot_selection": "默认不指定优先镜头；用户需要平台小测时自行选择，或另行要求建议。",
+    "why_this_shot": "无默认优先镜头。",
+    "pass_criteria": [
+      "可选检查项：角色不漂移、透视不漂移、动作不超载、风格一致。"
+    ],
+    "next_action": "线稿确认和合并版提示词完成后即可交付；平台小测不是默认流程关口，AI 不默认审核测试结果。"
+  },
+  "aggregate_video_prompt": "主体:@reference-product-rear.png、@reference-product-exploded.png、@reference-product-bottom.png、@reference-product-side.png 共同锁定同一款深枪灰/黑色机械装甲手机壳：左上三摄高护框、不对称机械背板、中央同轴磁吸环、6 点位向下的纵向折叠支架、固定螺钉与孔位、侧边按键、底部接口和全部装配层级。Shot 01-03 仅出现一只无饰品的成人右手，自然干净指甲、炭灰袖口，持黑色细杆制图笔从画面右侧操作；不出现脸、身体或第二只手。\n场景:前段为暖灰哑光高级设计工作台，白纸居中、细尺固定左上，左前柔和冷白主光；后段由纸面亮度连续延展为浅灰无缝产品台，右后保留窄轮廓光，背景干净、低饱和黑灰色域、留白充足。\n音乐:不要生成任何背景音乐和旋律，只需要生成场景及动作对应的音效\n\nShot 01 | 创意起点: 暖灰哑光工作台的高位三分之四宽景，白纸居中完整可见，细尺固定在左上；一只炭灰袖口的成人右手从画面右下持黑色细杆制图笔入画。笔尖先在纸面右下悬停，再落笔画出手机壳外轮廓与左上相机护框，最后停在中央结构附近，留下清晰半成稿。Camera: 35mm 高位短距离慢推，保持纸张四角、尺子位置、右手入画侧和左前光向稳定。Motion cue: 空白纸面逐渐成为半成稿，只有笔尖、手腕和镜头缓慢运动；保留纸张摩擦与制图笔描线声。\n\nShot 02 | 设计闭合: 同一暖灰工作台与白纸，正顶视近景；半成稿保持手机壳纵向放置，左上相机护框已完成，炭灰袖口的成人右手持笔停在中央结构附近。笔尖依次补齐同轴磁环、固定在 6 点位并向下延伸的纵向支架、不对称机械背板、护角、侧孔与紧固点；最后一笔闭合圆环，右手抬笔停在纸面右侧。Camera: 50mm 顶视近景轻微跟随笔尖，结尾完全锁定。Motion cue: 半成稿逐步变为完整平面设计图；结尾保持纸边裁切、图形尺度、左上相机岛和向下支架方向稳定，为下一镜连续转化保留精确位置。\n\nShot 03 | 二维成为实体: 正顶视近景中，完整手机壳线稿纵向居于同一张白纸，左上为相机护框，中央为同轴磁环，支架从 6 点位沿纵轴向下；右手抬笔停在纸面右侧。线稿静止后，只有既有制图线条逐层增厚隆起，依次形成相机护框、护角、机械背板、同轴磁环与纵向支架，最终成为与线稿位置、比例和朝向完全重合的深枪灰黑色实体；右手同步退出画面右侧。Camera: 50mm 锁定正顶视，仅极轻物理推近，不绕拍、不变焦。Motion cue: 平面线稿经过浅浮雕阶段成为真实产品；只使用纸纤维、材料伸展和部件落位声，禁止烟雾、粒子、液体、霓虹、全息 UI 或泛化变形。\n\nShot 04 | 成品首秀: 完整深枪灰黑色手机壳平躺在白纸中央，后背朝上，左上相机护框、中央同轴磁环、不对称机械背板和完全收平的向下支架清晰可见。产品从纸上平稳升起，缓慢转为后背三分之四英雄角度；暖白纸面亮度向四周连续延展为浅灰无缝产品台，不切换新空间。Camera: 50mm 从顶视高度物理下降到产品高度，并做受控短轨道环绕，结尾保持产品缓慢旋转。Motion cue: 产品由平躺转为悬起并短暂停顿，核心结构完整可读；左前冷白柔光与右后窄轮廓光始终固定。\n\nShot 05 | 边框与接口完成度: 浅灰无缝产品台上，完整手机壳悬浮于后背三分之四角度并沿固定方向缓慢转动，支架完全收平。产品只完成四分之一转；镜头从左上高起相机护框沿侧边下移，依次掠过加减长键、纹理功能键、加厚护角和三条斜纹，最后停在底部中央 USB-C 护圈、左右对称声孔与底角缓冲块。Camera: 85mm 浅景深微距侧向滑轨，关键轮廓持续清晰。Motion cue: 焦点与移动高光从相机护框流向底部，清楚区分哑光细颗粒 TPU、烟灰半透明 PC、深枪灰喷砂或拉丝合金和冷硬金属倒角；按键、接口和孔位不得换位、消失或增生。\n\nShot 06 | 支架机构: 浅灰产品台上的背面中央三分之四微距，手机壳完整悬浮，同轴磁环居中，支架铰链固定在磁环 6 点位，纵向支撑臂向下并与背板完全齐平；背板切面与紧固点清晰可见。支架沿唯一铰链向外翻至到位角并短暂停顿，再沿原路径折回，最终完全收平。Camera: 85mm 锁定近景，仅在打开阶段极轻推近，折回时保持距离。Motion cue: 展示一次完整开合，并配合克制的铰链到位卡嗒声；磁环不旋转、不偏心，支撑臂刻字的位置和方向不变，不新增文字。\n\nShot 07 | 动态爆炸与精密重组: 浅灰无缝产品台前，支架收平的完整手机壳以正面偏三分之四角度悬浮；机位顺时针倾斜约 12 度，使产品与拆解轴共同沿左下至右上形成动态斜线。固定装配层级从后到前依次为手机本体、TPU 内框、PC 背板、磁吸线圈、合金圆环与支架、螺丝与衬套、装饰面板、外层防护边框；各层按逆装配顺序沿唯一倾斜投影轴刚性分离，在最大可读间距短暂停留，再完全反向归位，螺丝最后旋紧。Camera: 50mm 基本锁定，仅做极轻水平视差。Motion cue: 完整成品展开为斜向机械层级后精确重组；所有层面互相平行、朝向一致，不翻面、不单独旋转，左上相机开口、孔位和圆环始终共轴，禁止变成水平目录排列、漏件、重件、镜像、换序或融化。\n\nShot 08 | 真实产品落地: 浅灰无缝产品台上，精确重组且支架完全收平的手机壳悬浮于后背三分之四角度，左上相机护框、中央同轴磁环、不对称背板与四角保护完整可见。产品缓慢转向后背主视并下降，窄高光依次扫过烟灰 PC 边框、机械背板、合金磁环与螺丝。Camera: 35mm 低位英雄角，先做短轨道环绕，再连续物理拉远；产品稳稳落台，最终在对称宽景中居中锁定。Motion cue: 悬浮成品依次完成转向、下降、接触与静止；左前冷白柔光和右后窄轮廓光保持固定，所有核心结构清晰可读。\n\nGlobal continuity: 四张产品参考共同代表同一款手机壳，不是不同款式。各 Shot 的文字描述共同锁定构图、起始状态、动作路径、镜头关系和镜间连续性；生成时只需上传主体段所列四张产品参考图，不依赖或要求用户另行上传任何分镜图或最终画面。全片禁止镜像产品，后视相机岛始终左上，磁环始终同轴，支架铰链固定在 6 点位并沿纵轴向下，背板切面、螺钉、孔位、按钮、接口、护角、部件数量和装配顺序不漂移。Shot 01-03 共用同一纸张、右手、入画侧、光向和相机轴，手退出后不再出现；Shot 04-08 共用同一浅灰产品台、左前冷白主光和右后窄轮廓光。材质始终区分哑光 TPU、烟灰半透明 PC、深枪灰合金与冷硬金属紧固件，禁止全部变成亮塑料。二维到三维只由既有线条获得厚度。禁止额外人物或手、虚构品牌、文字卡、标签、引线、漂浮 UI、烟雾、粒子、液体、霓虹、赛博背景、漏件、重件或换序。",
+  "storyboard_sheet": {
+    "label": "Final Frame Storyboard Sheet",
+    "path": "assets/storyboard-final-3col.jpg",
+    "note": "3-column stitched JPG storyboard sheet. Shot order preserved, original frame aspect ratio preserved, no crop, white background, Shot labels only."
+  },
+  "next_action": "请用户在 session.html 中审阅不依赖分镜图上传的自包含合并版提示词。"
+}

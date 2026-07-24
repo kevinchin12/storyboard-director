@@ -421,7 +421,5 @@ python3 storyboard-scene-pipeline-skill/scripts/install_storyboard_skills.py --c
 
 ## 示例
 
-- `examples/character/sea-convenience-store`：全流程 release 样例
-- `examples/subject/forest-mascot`：非人主体 workflow 样例
-- `examples/spatial/museum-dawn`：无固定主角空间片 workflow 样例
-- `examples/atmospheric/rain-window`：氛围片 workflow 样例
+- `examples/character/mibu-bedroom-adventure`：8 镜人物故事完整案例，包含角色与风格参考、线稿、最终画面、合并视频提示词和最终画面合集
+- `examples/subject/sketch-to-mech-phone-case`：8 镜产品视频完整案例，包含多张产品结构参考、线稿、最终画面、拆解组装提示词和最终画面合集

@@ -28,10 +28,8 @@ SECRET_PATTERNS = (
     re.compile(r"(?i)(?:api[_-]?key|secret|password|token)\s*[:=]\s*['\"][^'\"\n]{12,}['\"]"),
 )
 EXAMPLE_PROFILES = {
-    "character/sea-convenience-store/session.json": "release",
-    "subject/forest-mascot/session.json": "workflow",
-    "spatial/museum-dawn/session.json": "workflow",
-    "atmospheric/rain-window/session.json": "workflow",
+    "character/mibu-bedroom-adventure/session.json": "release",
+    "subject/sketch-to-mech-phone-case/session.json": "release",
 }
 
 
@@ -105,7 +103,12 @@ def audit_private_markers(target: Path, failures: list[str]) -> None:
         except UnicodeDecodeError:
             continue
         for marker in PRIVATE_MARKERS:
-            if marker in text:
+            found = (
+                bool(re.search(rf"(?<![A-Za-z]){re.escape(marker)}(?![A-Za-z])", text))
+                if marker.isascii()
+                else marker in text
+            )
+            if found:
                 failures.append(f"公共文件仍含私有标记 `{marker}`: {path}")
                 break
 

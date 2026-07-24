@@ -131,6 +131,19 @@ GENERATED_STORYBOARD_DEPENDENCY_RES = (
     re.compile(r"(?:上传|添加|提供|输入|使用|采用|参照|参考|指定|调用).{0,16}(?:分镜(?:图|画面)?|线稿|最终帧)"),
     re.compile(r"(?:将|把|以).{0,8}(?:分镜(?:图|画面)?|线稿|最终帧).{0,12}(?:作为|当作|用作|上传|参考)"),
 )
+NEGATED_GENERATED_INPUT_RES = (
+    re.compile(
+        r"(?:do(?:es)?\s+not|never).{0,24}(?:require|ask).{0,32}"
+        r"(?:upload|attach|provide|input|use).{0,32}"
+        r"(?:storyboard|line[\s-]*art|final\s+frame|reference\s+frame)",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"(?:不依赖(?:或要求)?|不要求|无需|不需要|不得|禁止).{0,20}"
+        r"(?:上传|添加|提供|输入|使用|采用|参照|参考|指定|调用).{0,16}"
+        r"(?:分镜(?:图|画面)?|线稿|最终帧|起始帧|开始帧|结束帧|参考帧)"
+    ),
+)
 
 
 def resolve_asset(state_path: Path, raw_path: str) -> Path:
@@ -150,12 +163,15 @@ def copy_ready_dependency(text: str, *, allow_confirmed_reference_frames: bool =
         return "contains an @shotXX handle"
     if SHOT_FRAME_ASSET_RE.search(text):
         return "contains a generated per-shot line/final asset path"
+    dependency_text = text
+    for pattern in NEGATED_GENERATED_INPUT_RES:
+        dependency_text = pattern.sub("", dependency_text)
     dependency_patterns = (
         GENERATED_STORYBOARD_DEPENDENCY_RES
         if allow_confirmed_reference_frames
         else GENERATED_FRAME_DEPENDENCY_RES
     )
-    if any(pattern.search(text) for pattern in dependency_patterns):
+    if any(pattern.search(dependency_text) for pattern in dependency_patterns):
         return "requires generated storyboard, line-art, or frame imagery as an external input"
     return None
 
@@ -554,7 +570,7 @@ def validate_video_prompts(
                 failures,
             )
             require(
-                any(token in seedance.lower() for token in ("avoid", "no new", "不要", "避免")),
+                any(token in seedance.lower() for token in ("avoid", "no new", "不要", "避免", "禁止")),
                 f"{shot_id} visible video prompt lacks avoid constraint",
                 failures,
             )

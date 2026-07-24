@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>从草图到机甲手机壳 - Storyboard</title>
+  <style>
+    :root {
+      --bg: #f5f5f7;
+      --bg-soft: #f2f3f5;
+      --panel: #ffffff;
+      --panel-strong: #f6f6f8;
+      --ink: #1d1d1f;
+      --muted: #5f6368;
+      --faint: #8a8f98;
+      --line: rgba(29, 29, 31, 0.09);
+      --line-strong: rgba(29, 29, 31, 0.16);
+      --accent: #0071e3;
+      --accent-soft: #eef6ff;
+      --accent-gradient: linear-gradient(100deg, #0066cc 0%, #00a3ff 100%);
+      --shadow: 0 12px 34px rgba(0, 0, 0, 0.06);
+      --radius: 8px;
+      --font-display: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC", "Noto Sans SC", Arial, sans-serif;
+      --font-body: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC", "Noto Sans SC", Arial, sans-serif;
+      --font-mono: "SFMono-Regular", "JetBrains Mono", "IBM Plex Mono", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    .page {
+      width: min(1500px, calc(100vw - 40px));
+      margin: 30px auto 72px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    .panel {
+      min-width: 0;
+      background: var(--panel);
+      border: 1px solid rgba(29, 29, 31, 0.06);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    section {
+      padding: 26px;
+    }
+
+    h1, h2, h3, p {
+      margin: 0;
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: 48px;
+      font-weight: 650;
+      letter-spacing: 0;
+      line-height: 1.16;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    h2 {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 650;
+      letter-spacing: 0;
+      line-height: 1.3;
+      margin-bottom: 18px;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .eyebrow {
+      font-family: var(--font-body);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink);
+      margin-bottom: 12px;
+    }
+
+    .header-grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.8fr);
+      align-items: stretch;
+    }
+
+    .card {
+      padding: 18px;
+      border-radius: var(--radius);
+      border: 0;
+      background: var(--panel-strong);
+    }
+
+    .summary-card {
+      min-height: 100%;
+      display: grid;
+      align-content: center;
+      gap: 8px;
+    }
+
+    .body-text,
+    .meta-value {
+      color: var(--muted);
+      line-height: 1.68;
+      font-size: 14px;
+    }
+
+    .body-text ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .body-text li + li {
+      margin-top: 5px;
+    }
+
+    .credit {
+      margin-top: 10px;
+      color: var(--faint);
+      font-size: 13px;
+      font-family: var(--font-body);
+      letter-spacing: 0.04em;
+      line-height: 1.4;
+    }
+
+    .delivery-grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .delivery-card {
+      padding: 16px;
+      border-radius: var(--radius);
+      border: 0;
+      background: var(--panel-strong);
+    }
+
+    .readiness-table {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--panel-strong);
+    }
+
+    .readiness-row {
+      display: grid;
+      grid-template-columns: 1.1fr 0.7fr 0.8fr 1fr 1.5fr;
+      gap: 10px;
+      padding: 11px 14px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .readiness-row-no-duration {
+      grid-template-columns: 1.1fr 0.8fr 1fr 1.5fr;
+    }
+
+    .readiness-row:first-child {
+      border-top: 0;
+    }
+
+    .readiness-head {
+      color: var(--faint);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      background: var(--accent-soft);
+      font-size: 10px;
+    }
+
+    .readiness-shot {
+      color: var(--ink);
+      font-weight: 700;
+    }
+
+    .storyboard-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .overview-section {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    .overview-subhead {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 14px;
+      padding-bottom: 10px;
+      border-bottom: 0;
+    }
+
+    .overview-subtitle {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 650;
+      color: var(--ink);
+    }
+
+    .overview-grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .overview-card {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+      border-radius: var(--radius);
+      border: 0;
+      background: var(--panel-strong);
+      box-shadow: none;
+      content-visibility: auto;
+      contain-intrinsic-block-size: 420px;
+    }
+
+    .overview-shot {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .overview-id {
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 650;
+      letter-spacing: 0;
+      color: var(--ink);
+    }
+
+    .overview-duration {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    .overview-duration::before {
+      content: "/";
+      margin-right: 10px;
+      color: var(--faint);
+    }
+
+    .overview-label {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .overview-frame {
+      aspect-ratio: 16 / 9;
+      border-radius: var(--radius);
+      border: 0;
+      background: var(--bg-soft);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      color: var(--muted);
+      text-align: center;
+      padding: 10px;
+    }
+
+    .overview-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+      display: block;
+    }
+
+    .aggregate-prompt-card {
+      display: grid;
+      gap: 14px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .aggregate-prompt-card.has-sheet {
+      grid-template-columns: minmax(320px, 4fr) minmax(0, 5fr);
+      align-items: stretch;
+    }
+
+    .aggregate-sheet-area {
+      display: grid;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .aggregate-sheet-frame {
+      aspect-ratio: 4 / 3;
+      border-radius: var(--radius);
+      border: 0;
+      background: var(--panel-strong);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+
+    .aggregate-sheet-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+    }
+
+    .aggregate-prompt-area {
+      display: grid;
+      min-width: 0;
+    }
+
+    .aggregate-prompt-copy {
+      min-height: 260px;
+      border: 0;
+      background: var(--panel-strong);
+    }
+
+    .aggregate-prompt-card.has-sheet .aggregate-prompt-copy {
+      height: 100%;
+      min-height: 420px;
+    }
+
+    .method-guide-title {
+      max-width: 760px;
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 650;
+      line-height: 1.28;
+      color: var(--ink);
+    }
+
+    .method-guide-definition {
+      max-width: 920px;
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: var(--radius);
+      background: var(--panel-strong);
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .method-list {
+      --method-columns: 56px minmax(220px, 0.65fr) minmax(0, 1.35fr) minmax(260px, 1fr);
+      margin-top: 22px;
+      border-top: 3px solid var(--accent);
+    }
+
+    .method-head {
+      display: grid;
+      grid-template-columns: var(--method-columns);
+      gap: 18px;
+      padding: 12px 0 10px;
+      border-bottom: 1px solid var(--line);
+      color: var(--faint);
+      font-size: 11px;
+      font-weight: 650;
+      line-height: 1.4;
+    }
+
+    .method-row {
+      display: grid;
+      grid-template-columns: var(--method-columns);
+      gap: 18px;
+      align-items: start;
+      padding: 22px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .method-head > :last-child,
+    .method-row > .method-inputs {
+      padding-left: 70px;
+    }
+
+    .method-index {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 500;
+      line-height: 1.2;
+      color: var(--accent);
+    }
+
+    .method-name {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 650;
+      line-height: 1.45;
+      color: var(--ink);
+    }
+
+    .method-description {
+      max-width: 820px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.75;
+    }
+
+    .method-inputs {
+      display: flex;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .method-input {
+      padding: 5px 8px;
+      border-radius: 6px;
+      background: var(--accent-soft);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    .method-footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: baseline;
+      padding-top: 18px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .method-footer strong {
+      color: var(--ink);
+    }
+
+    .method-footer-rule {
+      flex: 0 0 auto;
+      color: var(--faint);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+    }
+
+    .storyboard-sheet-card {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      border-radius: var(--radius);
+      border: 0;
+      background: var(--panel-strong);
+    }
+
+    .storyboard-sheet-frame {
+      border-radius: var(--radius);
+      border: 0;
+      background: var(--bg-soft);
+      overflow: hidden;
+    }
+
+    .storyboard-sheet-frame img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .shot-board {
+      padding: 14px;
+      border-radius: var(--radius);
+      border: 0;
+      background: var(--panel);
+      display: grid;
+      gap: 12px;
+      overflow: visible;
+      content-visibility: auto;
+      contain-intrinsic-block-size: 760px;
+    }
+
+    .shot-board + .shot-board {
+      border-top: 1px solid var(--line);
+      border-radius: 0;
+      padding-top: 26px;
+    }
+
+    .shot-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      padding: 0 2px 2px;
+      border-bottom: 0;
+      background: var(--panel);
+    }
+
+    .shot-title {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .shot-id {
+      font-family: var(--font-display);
+      font-size: 19px;
+      font-weight: 650;
+      letter-spacing: 0;
+      color: var(--ink);
+    }
+
+    .shot-duration {
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 500;
+      letter-spacing: 0;
+      color: var(--muted);
+    }
+
+    .duration-note {
+      font-family: var(--font-body);
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      color: var(--faint);
+      margin-left: 6px;
+    }
+
+    .shot-duration::before {
+      content: "/";
+      margin-right: 12px;
+      color: var(--faint);
+    }
+
+    .shot-layout {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: minmax(0, 1.05fr) minmax(390px, 0.95fr);
+      align-items: stretch;
+    }
+
+    .asset-grid {
+      display: grid;
+      gap: 0;
+      grid-template-columns: 1fr;
+      grid-auto-rows: minmax(0, 1fr);
+      background: var(--panel);
+      border-right: 0;
+      align-self: stretch;
+    }
+
+    .reference-layout {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .reference-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .text-review-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .review-card {
+      display: grid;
+      gap: 10px;
+    }
+
+    .review-status {
+      display: inline-flex;
+      width: fit-content;
+      padding: 4px 8px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: var(--accent-soft);
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .asset-card {
+      display: grid;
+      gap: 12px;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      min-height: 0;
+      padding: 14px;
+      border-radius: var(--radius);
+      background: var(--panel-strong);
+    }
+
+    .asset-label {
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .asset-frame {
+      border-radius: var(--radius);
+      border: 0;
+      background: var(--panel);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      color: var(--muted);
+      text-align: center;
+      padding: 0;
+      min-height: 220px;
+      height: 100%;
+    }
+
+    .asset-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+      display: block;
+    }
+
+    .asset-link {
+      display: none;
+      font-size: 12px;
+      color: var(--accent);
+      word-break: break-all;
+      text-decoration: none;
+      opacity: 0.74;
+    }
+
+    .info-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-rows: auto auto auto minmax(0, 1fr);
+      align-self: stretch;
+    }
+
+    .info-card {
+      padding: 14px 16px;
+      border-radius: var(--radius);
+      border: 0;
+      background: var(--panel-strong);
+    }
+
+    .info-card:has(.video-prompt) {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      min-height: 0;
+    }
+
+    .info-label {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--faint);
+      margin-bottom: 7px;
+    }
+
+    .info-value {
+      color: var(--ink);
+      line-height: 1.78;
+      font-size: 14px;
+    }
+
+    .video-prompt {
+      display: grid;
+      grid-template-rows: minmax(0, 1fr);
+      gap: 10px;
+      font-size: 13px;
+      min-height: 0;
+      height: 100%;
+    }
+
+    .prompt-block {
+      padding: 0;
+      border-radius: var(--radius);
+      background: transparent;
+      border: 0;
+      min-height: 0;
+      height: 100%;
+    }
+
+    .prompt-copy {
+      display: block;
+      width: 100%;
+      min-height: 118px;
+      height: 100%;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      color: var(--ink);
+      padding: 12px 13px;
+      font: 13px/1.65 var(--font-body);
+      white-space: pre-wrap;
+    }
+
+    .empty {
+      padding: 16px;
+      border-radius: var(--radius);
+      border: 1px dashed var(--line-strong);
+      color: var(--muted);
+      background: var(--bg-soft);
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      background: var(--accent-soft);
+      padding: 2px 6px;
+      border-radius: var(--radius);
+    }
+
+    @media (max-width: 1100px) {
+      .header-grid,
+      .shot-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .asset-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: none;
+        border-right: 0;
+      }
+
+      .delivery-grid,
+      .reference-layout,
+      .text-review-grid,
+      .overview-grid,
+      .aggregate-prompt-card.has-sheet,
+      .readiness-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 1080px) {
+      .method-row {
+        grid-template-columns: 48px minmax(0, 1fr);
+        gap: 12px 14px;
+        padding: 18px 0;
+      }
+
+      .method-head {
+        display: none;
+      }
+
+      .method-index {
+        font-size: 21px;
+      }
+
+      .method-name,
+      .method-description,
+      .method-inputs {
+        grid-column: 2;
+      }
+
+      .method-inputs::before {
+        width: 100%;
+        margin-bottom: 2px;
+        color: var(--faint);
+        content: "建议输入";
+        font-size: 11px;
+        font-weight: 650;
+        line-height: 1.4;
+      }
+
+      .method-row > .method-inputs {
+        padding-left: 0;
+      }
+    }
+
+    @media (max-width: 980px) {
+      .page {
+        width: min(calc(100vw - 24px), 1480px);
+        margin: 12px auto 40px;
+      }
+
+      section {
+        padding: 18px;
+      }
+
+      h1 {
+        font-size: 34px;
+      }
+
+      .credit {
+        font-size: 12px;
+      }
+
+      .method-guide-title {
+        font-size: 24px;
+      }
+
+      .method-footer {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="panel">
+      <div class="header-grid">
+        <div>
+          <div class="eyebrow">Storyboard</div>
+          <h1>从草图到机甲手机壳</h1>
+          <div class="credit">Sketch to Mech Case</div>
+        </div>
+        <div class="card summary-card">
+          <div class="eyebrow">Brief</div>
+          <div class="body-text">一条高级工业产品短片：设计师在洁净工作台上绘制机甲手机壳，最后一笔闭合后，二维图纸沿原有线条逐层隆起并成为真实产品；随后通过整体首秀、边框与接口微距、支架机构和可逆爆炸拆装，完成从创意草图到真实成品落地的表达。</div>
+          <div class="meta-value">画面比例：16:9</div>
+          <div class="meta-value">最后更新：2026-07-24 20:50</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>故事摘要</h2>
+      <div class="card">
+        <div class="body-text">干净高级的工作台上，一只手用制图笔完成手机壳设计图。最后一笔触发二维线稿沿原轮廓挤出，成为与参考图一致的黑灰机甲手机壳。产品进入棚拍展示，依次证明整体设计、侧边与底部细节、折叠支架功能和内部层级，最后重组落台形成英雄定格。</div>
+      </div>
+    </section>
+
+
+      <section class="panel">
+        <h2>角色设定与场景图</h2>
+        <div class="reference-layout">
+          <div>
+            <div class="overview-subhead"><div class="overview-subtitle">角色设定图</div></div>
+            <div style="height: 12px;"></div>
+            <div class="empty">暂无角色设定图，等待上传</div>
+          </div>
+          <div>
+            <div class="overview-subhead"><div class="overview-subtitle">场景图</div></div>
+            <div style="height: 12px;"></div>
+            <div class="reference-grid"><article class="asset-card"><div class="asset-label">Product Rear Identity</div><div class="asset-frame"><img src="assets/reference-product-rear.png" alt="Product Rear Identity" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/reference-product-rear.png">assets/reference-product-rear.png</a><div class="meta-value">控制完整后视轮廓、左上三摄护框、不对称机械背板、中央磁环、6 点位纵向 MECH-01 支架、螺钉与黑灰材质分区。</div></article><article class="asset-card"><div class="asset-label">Product Exploded Construction</div><div class="asset-frame"><img src="assets/reference-product-exploded.png" alt="Product Exploded Construction" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/reference-product-exploded.png">assets/reference-product-exploded.png</a><div class="meta-value">控制部件数量、相对比例、孔位、朝向和拆装顺序：手机、TPU 内框、PC 硬背板、磁吸组件、合金支架、螺丝/衬套、装饰面板、外层防护框。</div></article><article class="asset-card"><div class="asset-label">Product Bottom Detail</div><div class="asset-frame"><img src="assets/reference-product-bottom.png" alt="Product Bottom Detail" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/reference-product-bottom.png">assets/reference-product-bottom.png</a><div class="meta-value">控制中央 USB-C 加厚护圈、左右对称圆形声孔、底角防护块和底边厚度。</div></article><article class="asset-card"><div class="asset-label">Product Side Detail</div><div class="asset-frame"><img src="assets/reference-product-side.png" alt="Product Side Detail" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/reference-product-side.png">assets/reference-product-side.png</a><div class="meta-value">控制侧边厚度、相机凸起、+/- 键、纹理功能键、三条斜纹、MECH-01 位置和下段开孔。</div></article></div>
+          </div>
+        </div>
+      </section>
+
+
+
+
+    <section class="panel">
+      <h2>故事板</h2>
+      <div class="storyboard-list">
+
+            <article class="shot-board">
+              <div class="shot-head">
+                <div class="shot-title">
+                  <span class="shot-id">Shot 01</span>
+
+                </div>
+              </div>
+              <div class="shot-layout">
+                <div class="asset-grid">
+                  <div class="asset-card">
+                    <div class="asset-label">Line Art</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot01-line.jpg" alt="Shot 01 Line Draft" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot01-line.jpg">assets/shot01-line.jpg</a></div>
+                  </div>
+
+                  <div class="asset-card">
+                    <div class="asset-label">Frame</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot01-final.jpg" alt="Shot 01 Final" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot01-final.jpg">assets/shot01-final.jpg</a></div>
+                  </div>
+
+                </div>
+                <div class="info-grid">
+                  <div class="info-card">
+                    <span class="info-label">画面</span>
+                    <div class="info-value">暖灰哑光工作台高位斜俯宽景；白纸固定居中，细尺在左上，黑色制图笔由画面右下方进入，右手和炭灰袖口只占右侧边缘，背景留白干净。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">镜头</span>
+                    <div class="info-value">35mm 高位三分之四宽景，缓慢短距离推近；纸张四角和手的入画侧始终可读。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">动作</span>
+                    <div class="info-value">起点：纸面近乎空白，笔尖悬停在右下。过程：右手落笔，沿纸面画出手机壳外轮廓与左上相机护框。落点：半成稿已清晰建立，笔尖停在中央结构附近。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">视频提示词</span>
+                    <div class="info-value video-prompt"><div class="prompt-block"><textarea class="prompt-copy" readonly>暖灰哑光高级设计工作台，高位三分之四宽景；白纸居中且四角完整可见，细尺固定左上，一只炭灰袖口的成人右手从画面右下持黑色细杆制图笔入画。起点是笔尖悬停在纸面右下，随后落笔画出手机壳外轮廓与左上相机护框，最后停在中央结构附近，留下清晰半成稿。镜头使用 35mm 高位短距离慢推，纸张、尺子、右手入画侧和左前柔和冷白光保持固定。画面变化是空白纸面逐渐成为半成稿；只有纸张摩擦与制图笔描线声，不生成音乐。禁止第二只手、人物身体、文字卡和提前出现完整产品。</textarea></div></div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="shot-board">
+              <div class="shot-head">
+                <div class="shot-title">
+                  <span class="shot-id">Shot 02</span>
+
+                </div>
+              </div>
+              <div class="shot-layout">
+                <div class="asset-grid">
+                  <div class="asset-card">
+                    <div class="asset-label">Line Art</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot02-line.jpg" alt="Shot 02 Line Draft" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot02-line.jpg">assets/shot02-line.jpg</a></div>
+                  </div>
+
+                  <div class="asset-card">
+                    <div class="asset-label">Frame</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot02-final.jpg" alt="Shot 02 Final" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot02-final.jpg">assets/shot02-final.jpg</a></div>
+                  </div>
+
+                </div>
+                <div class="info-grid">
+                  <div class="info-card">
+                    <span class="info-label">画面</span>
+                    <div class="info-value">同一白纸的正顶视近景，完整外轮廓居中；笔尖围绕中央磁环、6 点位纵向支架、机械背板切面、侧孔和螺钉位置工作，右手留在画面右缘。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">镜头</span>
+                    <div class="info-value">50mm 正顶视 macro insert，缓慢跟随笔尖，结尾锁定完整设计图。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">动作</span>
+                    <div class="info-value">起点：承接半成稿。过程：笔尖补齐中央圆环、向下支架、机械背板和紧固点。落点：最后一笔闭合圆环，右手抬笔停在纸面右侧，完整平面设计图静止可读。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">视频提示词</span>
+                    <div class="info-value video-prompt"><div class="prompt-block"><textarea class="prompt-copy" readonly>暖灰哑光工作台的正顶视近景，白纸居中、细尺固定左上；半成稿纵向放置，左上相机护框已经完成，炭灰袖口的成人右手持笔停在中央结构附近。笔尖依次补齐同轴磁环、固定在 6 点位并向下延伸的纵向支架、不对称机械背板、护角、侧孔与紧固点，最后一笔闭合圆环，右手抬笔停在纸面右侧。镜头使用 50mm 顶视近景轻微跟随笔尖，结尾完全锁定纸边裁切、图形尺度、左上相机岛和向下支架方向。画面变化是半成稿成为完整平面设计图；只有铅笔描线和抬笔摩擦声，不生成音乐。禁止标注、UI、镜像和提前三维化。</textarea></div></div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="shot-board">
+              <div class="shot-head">
+                <div class="shot-title">
+                  <span class="shot-id">Shot 03</span>
+
+                </div>
+              </div>
+              <div class="shot-layout">
+                <div class="asset-grid">
+                  <div class="asset-card">
+                    <div class="asset-label">Line Art</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot03-line.jpg" alt="Shot 03 Line Draft" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot03-line.jpg">assets/shot03-line.jpg</a></div>
+                  </div>
+
+                  <div class="asset-card">
+                    <div class="asset-label">Frame</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot03-final.jpg" alt="Shot 03 Final" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot03-final.jpg">assets/shot03-final.jpg</a></div>
+                  </div>
+
+                </div>
+                <div class="info-grid">
+                  <div class="info-card">
+                    <span class="info-label">画面</span>
+                    <div class="info-value">与 Shot 02 结尾严格相同的正顶视构图；完整设计图居中，手在纸面右侧，现有制图线条沿自身轮廓形成浅层高度。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">镜头</span>
+                    <div class="info-value">50mm 锁定正顶视，不绕拍、不变焦；只允许极轻微物理推近强调厚度形成。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">动作</span>
+                    <div class="info-value">起点：完整平面线稿静止。过程：既有线条增厚并逐层隆起，圆环、护角、相机框和背板获得真实厚度；手向右退出。落点：黑灰实体手机壳完整落在原图轮廓上，位置与朝向不变。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">视频提示词</span>
+                    <div class="info-value video-prompt"><div class="prompt-block"><textarea class="prompt-copy" readonly>正顶视近景中，完整手机壳线稿纵向居于白纸中央：相机护框位于左上，中央为同轴磁环，支架从 6 点位沿纵轴向下；成人右手抬笔停在纸面右侧。线稿静止后，只有既有制图线条逐层增厚隆起，依次形成相机护框、护角、机械背板、同轴磁环与纵向支架，最终成为与纸上线稿位置、比例和朝向完全重合的深枪灰黑色实体，右手同步退出画面右侧。镜头使用 50mm 锁定正顶视，仅极轻物理推近，不绕拍、不变焦。画面变化是平面线稿经过浅浮雕阶段成为真实产品；只有纸纤维、材料伸展和落位声，不生成音乐。禁止烟雾、粒子、液体、霓虹、全息 UI 或泛化变形。</textarea></div></div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="shot-board">
+              <div class="shot-head">
+                <div class="shot-title">
+                  <span class="shot-id">Shot 04</span>
+
+                </div>
+              </div>
+              <div class="shot-layout">
+                <div class="asset-grid">
+                  <div class="asset-card">
+                    <div class="asset-label">Line Art</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot04-line.jpg" alt="Shot 04 Line Draft" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot04-line.jpg">assets/shot04-line.jpg</a></div>
+                  </div>
+
+                  <div class="asset-card">
+                    <div class="asset-label">Frame</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot04-final.jpg" alt="Shot 04 Final" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot04-final.jpg">assets/shot04-final.jpg</a></div>
+                  </div>
+
+                </div>
+                <div class="info-grid">
+                  <div class="info-card">
+                    <span class="info-label">画面</span>
+                    <div class="info-value">实体手机壳从纸面轻微升起，暖白纸面亮度延展为浅灰无缝产品台；产品以背面三分之四角度占据画面中心，完整相机护框、机械背板、磁环和收平支架均可见。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">镜头</span>
+                    <div class="info-value">50mm 低位三分之四受控短轨道环绕，由顶视高度下降到产品高度；运动顺畅且不穿模。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">动作</span>
+                    <div class="info-value">起点：实体平躺纸上。过程：产品升起并缓慢转向背面三分之四角度，环境无缝化为浅灰产品台。落点：产品在完整英雄角度短暂停住，支架仍收平。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">视频提示词</span>
+                    <div class="info-value video-prompt"><div class="prompt-block"><textarea class="prompt-copy" readonly>完整深枪灰黑色机械装甲手机壳平躺在白纸中央，后背朝上，左上相机护框、中央同轴磁环、不对称机械背板和完全收平的向下支架清晰可见。产品从纸面平稳升起，缓慢转为后背三分之四英雄角度；暖白纸面亮度向四周连续延展为浅灰无缝产品台，不切换新空间。镜头使用 50mm，从顶视高度物理下降到产品高度并做受控短轨道环绕，结尾保持缓慢旋转趋势。画面变化是产品由平躺转为悬起并短暂停顿，核心结构完整可读；左前冷白柔光与右后窄轮廓光始终固定。只有升降机械与空气滑动声，不生成音乐。禁止镜像、打开支架或改变产品款式。</textarea></div></div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="shot-board">
+              <div class="shot-head">
+                <div class="shot-title">
+                  <span class="shot-id">Shot 05</span>
+
+                </div>
+              </div>
+              <div class="shot-layout">
+                <div class="asset-grid">
+                  <div class="asset-card">
+                    <div class="asset-label">Line Art</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot05-line.jpg" alt="Shot 05 Line Draft" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot05-line.jpg">assets/shot05-line.jpg</a></div>
+                  </div>
+
+                  <div class="asset-card">
+                    <div class="asset-label">Frame</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot05-final.jpg" alt="Shot 05 Final" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot05-final.jpg">assets/shot05-final.jpg</a></div>
+                  </div>
+
+                </div>
+                <div class="info-grid">
+                  <div class="info-card">
+                    <span class="info-label">画面</span>
+                    <div class="info-value">浅灰产品台上的同一手机壳保持缓慢四分之一转动；近景从高起相机护框切入，沿侧边按键和纹理功能键向下，底部 USB-C 与双排声孔成为结尾主体。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">镜头</span>
+                    <div class="info-value">85mm macro 侧向滑轨，先沿侧边下移再顺势到达底边；浅景深但关键轮廓持续清晰。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">动作</span>
+                    <div class="info-value">起点：承接 Shot 04 后背三分之四角度。过程：产品缓慢旋转，移动高光依次划过相机护框、+/- 键、纹理键、护角和侧边斜纹。落点：底部中央接口、左右声孔和底角保护在近景中清晰停住。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">视频提示词</span>
+                    <div class="info-value video-prompt"><div class="prompt-block"><textarea class="prompt-copy" readonly>浅灰无缝产品台上，完整手机壳悬浮于后背三分之四角度，支架完全收平，并沿固定方向缓慢完成四分之一转。镜头从左上高起相机护框沿侧边下移，依次掠过加减长键、纹理功能键、加厚护角和三条斜纹，最后停在底部中央 USB-C 护圈、左右对称声孔与底角缓冲块。镜头使用 85mm 浅景深微距侧向滑轨，关键轮廓持续清晰。移动高光清楚区分哑光细颗粒 TPU、烟灰半透明 PC、深枪灰喷砂或拉丝合金和冷硬金属倒角。只有塑胶摩擦与克制按键触感声，不生成音乐。按键、接口和孔位不得换位、消失或增生，禁止所有表面变成亮塑料。</textarea></div></div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="shot-board">
+              <div class="shot-head">
+                <div class="shot-title">
+                  <span class="shot-id">Shot 06</span>
+
+                </div>
+              </div>
+              <div class="shot-layout">
+                <div class="asset-grid">
+                  <div class="asset-card">
+                    <div class="asset-label">Line Art</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot06-line.jpg" alt="Shot 06 Line Draft" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot06-line.jpg">assets/shot06-line.jpg</a></div>
+                  </div>
+
+                  <div class="asset-card">
+                    <div class="asset-label">Frame</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot06-final.jpg" alt="Shot 06 Final" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot06-final.jpg">assets/shot06-final.jpg</a></div>
+                  </div>
+
+                </div>
+                <div class="info-grid">
+                  <div class="info-card">
+                    <span class="info-label">画面</span>
+                    <div class="info-value">同一手机壳背面中央三分之四 macro 近景，圆形磁环和 6 点位铰链占据中心，纵向支撑臂与机械背板轮廓完整可读。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">镜头</span>
+                    <div class="info-value">85mm macro 锁定三分之四近景，机构打开时做极轻推近，折回时保持距离。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">动作</span>
+                    <div class="info-value">起点：支架与背板齐平。过程：支撑臂从 6 点位铰链向外翻出并到位短暂停顿，再沿同一路径折回。落点：支架重新与背板齐平，为下一镜拆解恢复完整封闭状态。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">视频提示词</span>
+                    <div class="info-value video-prompt"><div class="prompt-block"><textarea class="prompt-copy" readonly>浅灰产品台上的背面中央三分之四微距，完整手机壳悬浮，同轴磁环居中，支架铰链固定在磁环 6 点位，纵向支撑臂向下并与背板完全齐平，背板切面与紧固点清晰可见。支架沿唯一铰链向外翻至到位角并短暂停顿，再沿原路径折回，最终完全收平。镜头使用 85mm 锁定近景，仅在打开阶段极轻推近，折回时保持距离。画面变化是一次完整机械开合；只有铰链摩擦、到位卡嗒和回收声，不生成音乐。磁环不得旋转或偏心，不新增文字，禁止多重支架姿态。</textarea></div></div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="shot-board">
+              <div class="shot-head">
+                <div class="shot-title">
+                  <span class="shot-id">Shot 07</span>
+
+                </div>
+              </div>
+              <div class="shot-layout">
+                <div class="asset-grid">
+                  <div class="asset-card">
+                    <div class="asset-label">Line Art</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot07-line.jpg" alt="Shot 07 Line Draft" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot07-line.jpg">assets/shot07-line.jpg</a></div>
+                  </div>
+
+                  <div class="asset-card">
+                    <div class="asset-label">Frame</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot07-final.jpg" alt="Shot 07 Final" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot07-final.jpg">assets/shot07-final.jpg</a></div>
+                  </div>
+
+                </div>
+                <div class="info-grid">
+                  <div class="info-card">
+                    <span class="info-label">画面</span>
+                    <div class="info-value">浅灰产品台中央的完整手机壳与全部拆解层形成一条左下到右上的动态斜线；整组刚性系统在画面平面内顺时针倾斜约 12 度，拆解后各部件沿同一倾斜投影轴保持清楚间距，产品朝向、孔位、长边和圆环轴线彼此平行。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">镜头</span>
+                    <div class="info-value">50mm 正面偏三分之四构图，机位做约 12 度顺时针 camera roll；爆炸轴在画面中由左下升向右上，镜头基本锁定，仅做极轻水平视差，不能变成俯视目录图。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">动作</span>
+                    <div class="info-value">起点：承接 Shot 06 的完整封闭成品。过程：外框、装饰板、螺丝/衬套、合金支架、磁吸组件、PC 背板、TPU 内框与手机依序分离，短暂停留后反向归位。落点：螺丝最后旋紧，产品恢复与起点完全相同的完整状态。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">视频提示词</span>
+                    <div class="info-value video-prompt"><div class="prompt-block"><textarea class="prompt-copy" readonly>浅灰无缝产品台前，支架完全收平的完整手机壳以正面偏三分之四角度悬浮；机位顺时针倾斜约 12 度，使产品与拆解轴共同沿左下至右上形成动态斜线。固定装配层级从后到前依次为手机本体、TPU 内框、PC 背板、磁吸线圈、合金圆环与支架、螺丝与衬套、装饰面板、外层防护边框；各层按逆装配顺序沿唯一倾斜投影轴刚性分离，在最大可读间距短暂停留，再完全反向归位，螺丝最后旋紧。镜头使用 50mm，基本锁定，仅做极轻水平视差。所有层面互相平行、朝向一致，不翻面、不单独旋转，左上相机开口、孔位和圆环始终共轴。只有机械滑动、磁吸定位、旋入与收口声，不生成音乐。禁止水平目录排列、漏件、重件、镜像、换序、融化和标签。</textarea></div></div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="shot-board">
+              <div class="shot-head">
+                <div class="shot-title">
+                  <span class="shot-id">Shot 08</span>
+
+                </div>
+              </div>
+              <div class="shot-layout">
+                <div class="asset-grid">
+                  <div class="asset-card">
+                    <div class="asset-label">Line Art</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot08-line.jpg" alt="Shot 08 Line Draft" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot08-line.jpg">assets/shot08-line.jpg</a></div>
+                  </div>
+
+                  <div class="asset-card">
+                    <div class="asset-label">Frame</div>
+                    <div class="asset-stack"><div class="asset-frame"><img src="assets/shot08-final.jpg" alt="Shot 08 Final" loading="lazy" decoding="async" /></div><a class="asset-link" href="assets/shot08-final.jpg">assets/shot08-final.jpg</a></div>
+                  </div>
+
+                </div>
+                <div class="info-grid">
+                  <div class="info-card">
+                    <span class="info-label">画面</span>
+                    <div class="info-value">重组完成的同一手机壳位于浅灰无缝产品台中央，背面主视角逐渐转为轻微三分之四；圆环、收平支架、相机护框、背板切面和四角保护清晰，背景留白充足。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">镜头</span>
+                    <div class="info-value">35mm 低位英雄角度，短轨道环绕接连续物理拉远，最后锁定对称宽景。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">动作</span>
+                    <div class="info-value">起点：Shot 07 重组完成的成品悬浮。过程：产品缓慢转向背面主视角，窄高光扫过烟灰边框、金属环和螺丝，并下降接近台面。落点：产品稳稳落台，镜头拉远后居中定格。</div>
+                  </div>
+                  <div class="info-card">
+                    <span class="info-label">视频提示词</span>
+                    <div class="info-value video-prompt"><div class="prompt-block"><textarea class="prompt-copy" readonly>浅灰无缝产品台上，精确重组且支架完全收平的手机壳悬浮于后背三分之四角度，左上相机护框、中央同轴磁环、不对称背板与四角保护完整可见。产品缓慢转向后背主视并下降，窄高光依次扫过烟灰 PC 边框、机械背板、合金磁环与螺丝。镜头使用 35mm 低位英雄角，先做短轨道环绕，再连续物理拉远；产品稳稳落台，最终在对称宽景中居中锁定。画面变化是悬浮成品依次完成转向、下降、接触与静止；左前冷白柔光和右后窄轮廓光保持固定。只有空气滑动、轻金属共鸣和克制落台声，不生成音乐。禁止镜像、打开支架、换款、文字卡或 Logo 揭示。</textarea></div></div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>分镜总览</h2>
+
+      <div class="overview-section">
+        <div>
+        <div class="overview-subhead">
+            <div class="overview-subtitle">线稿总览</div>
+          </div>
+          <div style="height: 12px;"></div>
+          <div class="overview-grid">
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 01</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot01-line.jpg" alt="Shot 01 Line Draft" loading="lazy" decoding="async" /></div>
+            </article>
+
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 02</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot02-line.jpg" alt="Shot 02 Line Draft" loading="lazy" decoding="async" /></div>
+            </article>
+
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 03</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot03-line.jpg" alt="Shot 03 Line Draft" loading="lazy" decoding="async" /></div>
+            </article>
+
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 04</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot04-line.jpg" alt="Shot 04 Line Draft" loading="lazy" decoding="async" /></div>
+            </article>
+
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 05</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot05-line.jpg" alt="Shot 05 Line Draft" loading="lazy" decoding="async" /></div>
+            </article>
+
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 06</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot06-line.jpg" alt="Shot 06 Line Draft" loading="lazy" decoding="async" /></div>
+            </article>
+
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 07</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot07-line.jpg" alt="Shot 07 Line Draft" loading="lazy" decoding="async" /></div>
+            </article>
+
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 08</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot08-line.jpg" alt="Shot 08 Line Draft" loading="lazy" decoding="async" /></div>
+            </article>
+            </div>
+        </div>
+
+        <div>
+          <div class="overview-subhead">
+            <div class="overview-subtitle">画面总览</div>
+          </div>
+          <div style="height: 12px;"></div>
+          <div class="overview-grid">
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 01</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot01-final.jpg" alt="Shot 01 Final" loading="lazy" decoding="async" /></div>
+            </article>
+
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 02</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot02-final.jpg" alt="Shot 02 Final" loading="lazy" decoding="async" /></div>
+            </article>
+
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 03</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot03-final.jpg" alt="Shot 03 Final" loading="lazy" decoding="async" /></div>
+            </article>
+
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 04</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot04-final.jpg" alt="Shot 04 Final" loading="lazy" decoding="async" /></div>
+            </article>
+
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 05</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot05-final.jpg" alt="Shot 05 Final" loading="lazy" decoding="async" /></div>
+            </article>
+
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 06</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot06-final.jpg" alt="Shot 06 Final" loading="lazy" decoding="async" /></div>
+            </article>
+
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 07</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot07-final.jpg" alt="Shot 07 Final" loading="lazy" decoding="async" /></div>
+            </article>
+
+            <article class="overview-card">
+              <div class="overview-shot">
+                <span class="overview-id">Shot 08</span>
+
+              </div>
+              <div class="overview-frame"><img src="assets/shot08-final.jpg" alt="Shot 08 Final" loading="lazy" decoding="async" /></div>
+            </article>
+            </div>
+        </div>
+
+      </div>
+
+    </section>
+
+
+        <section class="panel">
+          <h2>整片生成提示词</h2>
+          <div class="aggregate-prompt-card has-sheet">
+
+      <div class="aggregate-sheet-area">
+        <div class="overview-label">Final Frame Storyboard Sheet</div>
+        <a class="aggregate-sheet-frame" href="assets/storyboard-final-3col.jpg" download>
+          <img src="assets/storyboard-final-3col.jpg" alt="Final Frame Storyboard Sheet" loading="lazy" decoding="async" />
+        </a>
+      </div>
+    <div class="aggregate-prompt-area"><div class="prompt-block"><textarea class="prompt-copy aggregate-prompt-copy" readonly>主体:@reference-product-rear.png、@reference-product-exploded.png、@reference-product-bottom.png、@reference-product-side.png 共同锁定同一款深枪灰/黑色机械装甲手机壳：左上三摄高护框、不对称机械背板、中央同轴磁吸环、6 点位向下的纵向折叠支架、固定螺钉与孔位、侧边按键、底部接口和全部装配层级。Shot 01-03 仅出现一只无饰品的成人右手，自然干净指甲、炭灰袖口，持黑色细杆制图笔从画面右侧操作；不出现脸、身体或第二只手。
+场景:前段为暖灰哑光高级设计工作台，白纸居中、细尺固定左上，左前柔和冷白主光；后段由纸面亮度连续延展为浅灰无缝产品台，右后保留窄轮廓光，背景干净、低饱和黑灰色域、留白充足。
+音乐:不要生成任何背景音乐和旋律，只需要生成场景及动作对应的音效
+
+Shot 01 | 创意起点: 暖灰哑光工作台的高位三分之四宽景，白纸居中完整可见，细尺固定在左上；一只炭灰袖口的成人右手从画面右下持黑色细杆制图笔入画。笔尖先在纸面右下悬停，再落笔画出手机壳外轮廓与左上相机护框，最后停在中央结构附近，留下清晰半成稿。Camera: 35mm 高位短距离慢推，保持纸张四角、尺子位置、右手入画侧和左前光向稳定。Motion cue: 空白纸面逐渐成为半成稿，只有笔尖、手腕和镜头缓慢运动；保留纸张摩擦与制图笔描线声。
+
+Shot 02 | 设计闭合: 同一暖灰工作台与白纸，正顶视近景；半成稿保持手机壳纵向放置，左上相机护框已完成，炭灰袖口的成人右手持笔停在中央结构附近。笔尖依次补齐同轴磁环、固定在 6 点位并向下延伸的纵向支架、不对称机械背板、护角、侧孔与紧固点；最后一笔闭合圆环，右手抬笔停在纸面右侧。Camera: 50mm 顶视近景轻微跟随笔尖，结尾完全锁定。Motion cue: 半成稿逐步变为完整平面设计图；结尾保持纸边裁切、图形尺度、左上相机岛和向下支架方向稳定，为下一镜连续转化保留精确位置。
+
+Shot 03 | 二维成为实体: 正顶视近景中，完整手机壳线稿纵向居于同一张白纸，左上为相机护框，中央为同轴磁环，支架从 6 点位沿纵轴向下；右手抬笔停在纸面右侧。线稿静止后，只有既有制图线条逐层增厚隆起，依次形成相机护框、护角、机械背板、同轴磁环与纵向支架，最终成为与线稿位置、比例和朝向完全重合的深枪灰黑色实体；右手同步退出画面右侧。Camera: 50mm 锁定正顶视，仅极轻物理推近，不绕拍、不变焦。Motion cue: 平面线稿经过浅浮雕阶段成为真实产品；只使用纸纤维、材料伸展和部件落位声，禁止烟雾、粒子、液体、霓虹、全息 UI 或泛化变形。
+
+Shot 04 | 成品首秀: 完整深枪灰黑色手机壳平躺在白纸中央，后背朝上，左上相机护框、中央同轴磁环、不对称机械背板和完全收平的向下支架清晰可见。产品从纸上平稳升起，缓慢转为后背三分之四英雄角度；暖白纸面亮度向四周连续延展为浅灰无缝产品台，不切换新空间。Camera: 50mm 从顶视高度物理下降到产品高度，并做受控短轨道环绕，结尾保持产品缓慢旋转。Motion cue: 产品由平躺转为悬起并短暂停顿，核心结构完整可读；左前冷白柔光与右后窄轮廓光始终固定。
+
+Shot 05 | 边框与接口完成度: 浅灰无缝产品台上，完整手机壳悬浮于后背三分之四角度并沿固定方向缓慢转动，支架完全收平。产品只完成四分之一转；镜头从左上高起相机护框沿侧边下移，依次掠过加减长键、纹理功能键、加厚护角和三条斜纹，最后停在底部中央 USB-C 护圈、左右对称声孔与底角缓冲块。Camera: 85mm 浅景深微距侧向滑轨，关键轮廓持续清晰。Motion cue: 焦点与移动高光从相机护框流向底部，清楚区分哑光细颗粒 TPU、烟灰半透明 PC、深枪灰喷砂或拉丝合金和冷硬金属倒角；按键、接口和孔位不得换位、消失或增生。
+
+Shot 06 | 支架机构: 浅灰产品台上的背面中央三分之四微距，手机壳完整悬浮，同轴磁环居中，支架铰链固定在磁环 6 点位，纵向支撑臂向下并与背板完全齐平；背板切面与紧固点清晰可见。支架沿唯一铰链向外翻至到位角并短暂停顿，再沿原路径折回，最终完全收平。Camera: 85mm 锁定近景，仅在打开阶段极轻推近，折回时保持距离。Motion cue: 展示一次完整开合，并配合克制的铰链到位卡嗒声；磁环不旋转、不偏心，支撑臂刻字的位置和方向不变，不新增文字。
+
+Shot 07 | 动态爆炸与精密重组: 浅灰无缝产品台前，支架收平的完整手机壳以正面偏三分之四角度悬浮；机位顺时针倾斜约 12 度，使产品与拆解轴共同沿左下至右上形成动态斜线。固定装配层级从后到前依次为手机本体、TPU 内框、PC 背板、磁吸线圈、合金圆环与支架、螺丝与衬套、装饰面板、外层防护边框；各层按逆装配顺序沿唯一倾斜投影轴刚性分离，在最大可读间距短暂停留，再完全反向归位，螺丝最后旋紧。Camera: 50mm 基本锁定，仅做极轻水平视差。Motion cue: 完整成品展开为斜向机械层级后精确重组；所有层面互相平行、朝向一致，不翻面、不单独旋转，左上相机开口、孔位和圆环始终共轴，禁止变成水平目录排列、漏件、重件、镜像、换序或融化。
+
+Shot 08 | 真实产品落地: 浅灰无缝产品台上，精确重组且支架完全收平的手机壳悬浮于后背三分之四角度，左上相机护框、中央同轴磁环、不对称背板与四角保护完整可见。产品缓慢转向后背主视并下降，窄高光依次扫过烟灰 PC 边框、机械背板、合金磁环与螺丝。Camera: 35mm 低位英雄角，先做短轨道环绕，再连续物理拉远；产品稳稳落台，最终在对称宽景中居中锁定。Motion cue: 悬浮成品依次完成转向、下降、接触与静止；左前冷白柔光和右后窄轮廓光保持固定，所有核心结构清晰可读。
+
+Global continuity: 四张产品参考共同代表同一款手机壳，不是不同款式。各 Shot 的文字描述共同锁定构图、起始状态、动作路径、镜头关系和镜间连续性；生成时只需上传主体段所列四张产品参考图，不依赖或要求用户另行上传任何分镜图或最终画面。全片禁止镜像产品，后视相机岛始终左上，磁环始终同轴，支架铰链固定在 6 点位并沿纵轴向下，背板切面、螺钉、孔位、按钮、接口、护角、部件数量和装配顺序不漂移。Shot 01-03 共用同一纸张、右手、入画侧、光向和相机轴，手退出后不再出现；Shot 04-08 共用同一浅灰产品台、左前冷白主光和右后窄轮廓光。材质始终区分哑光 TPU、烟灰半透明 PC、深枪灰合金与冷硬金属紧固件，禁止全部变成亮塑料。二维到三维只由既有线条获得厚度。禁止额外人物或手、虚构品牌、文字卡、标签、引线、漂浮 UI、烟雾、粒子、液体、霓虹、赛博背景、漏件、重件或换序。</textarea></div></div>
+          </div>
+        </section>
+
+
+    <section class="panel method-guide">
+      <h2>建议使用方法</h2>
+      <div class="method-guide-title">按脚本还原度选择生成方式</div>
+      <div class="method-guide-definition">
+        这里的“还原度”，不是还原参考图，而是这个镜头需要多严格地贴合脚本。三档没有质量高低，只代表控制强度不同。
+      </div>
+
+      <div class="method-list">
+        <div class="method-head" aria-hidden="true">
+          <div>编号</div>
+          <div>还原度</div>
+          <div>适用情况</div>
+          <div>建议输入</div>
+        </div>
+
+        <article class="method-row">
+          <div class="method-index">01</div>
+          <div class="method-name">还原度低：自由发挥</div>
+          <div class="method-description">适合氛围、情绪和环境建立镜头。使用画面提示词、角色设定与场景参考，允许模型自行补充构图、动作和画面细节。</div>
+          <div class="method-inputs" aria-label="建议输入">
+            <span class="method-input">提示词</span>
+            <span class="method-input">角色参考</span>
+            <span class="method-input">场景参考</span>
+          </div>
+        </article>
+
+        <article class="method-row">
+          <div class="method-index">02</div>
+          <div class="method-name">还原度中：允许小幅偏离</div>
+          <div class="method-description">适合主体、场景和大构图需要稳定，但动作过程可以适度发挥的镜头。逐镜提示词完整写清构图、起始状态、动作路径、运镜和落点，可搭配用户实际提供的主体与场景参考。</div>
+          <div class="method-inputs" aria-label="建议输入">
+            <span class="method-input">主体参考</span>
+            <span class="method-input">场景参考</span>
+            <span class="method-input">提示词</span>
+          </div>
+        </article>
+
+        <article class="method-row">
+          <div class="method-index">03</div>
+          <div class="method-name">还原度高：基本不能偏</div>
+          <div class="method-description">适合关键动作、产品展示、空间连续性或重要转场。用文本明确起始状态、主体与镜头的完整路径、可见结果、连续性和禁止项；必要时拆短镜头分段生成。</div>
+          <div class="method-inputs" aria-label="建议输入">
+            <span class="method-input">产品/主体参考</span>
+            <span class="method-input">场景/风格参考</span>
+            <span class="method-input">提示词</span>
+          </div>
+        </article>
+      </div>
+
+      <div class="method-footer">
+        <div><strong>先判断这个镜头最不能错的是什么，</strong>再增加对应约束。还原度越高，单个镜头越要减负。</div>
+        <div class="method-footer-rule">没有默认最优解</div>
+      </div>
+    </section>
+  </div>
+</body>
+</html>
