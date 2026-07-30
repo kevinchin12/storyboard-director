@@ -22,6 +22,17 @@ Do not use this skill for a one-off image prompt or for skipping directly to fin
 
 Default aspect ratio is `16:9`. Keep durations in JSON and hidden in HTML unless the user asks to show them.
 
+## First-Response Orientation
+
+Show this compact orientation only when both conditions are true: this is the first `storyboard-director` response in the current Codex task, and no existing storyboard session can be resolved for the current story. Include it even when the user already supplied a story, brief, or reference assets:
+
+- First: script package, per-shot line-art prompts, and text-only logic review.
+- After approval: parallel per-shot line art collected in the local HTML board.
+- After line-art approval: ordered per-shot and aggregate video prompts.
+- Optional on request: finished frames, line-art or finished-frame storyboard sheets, and target-model prompt adaptation.
+
+Present the four items in the user's language. Keep the orientation to these four short list items, then immediately continue with the user's supplied material in the same response. The orientation is informational, not a new approval gate or a reason to delay setup. Do not ask the user to repeat or re-upload inputs just to present it. Once shown, do not repeat it in the same Codex task even if a session has not been created yet. Do not show it when continuing a resolvable existing session, later stage, or repair turn, and omit it when the user explicitly asks to skip the introduction.
+
 ## Copy-Ready Prompt Independence
 
 Copy-ready aggregate and per-shot video prompts are text-self-contained. Use confirmed line art and optional finished frames only as silent authoring guidance, then translate every relevant visual fact into words. Never require the user to upload, attach, or `@` internally generated line art, finished frames, storyboard sheets, or local asset paths.
