@@ -24,14 +24,23 @@ Default aspect ratio is `16:9`. Keep durations in JSON and hidden in HTML unless
 
 ## First-Response Orientation
 
-Show this compact orientation only when both conditions are true: this is the first `storyboard-director` response in the current Codex task, and no existing storyboard session can be resolved for the current story. Include it even when the user already supplied a story, brief, or reference assets:
+Show this compact orientation only when both conditions are true: this is the first `storyboard-director` response in the current Codex task, and no existing storyboard session can be resolved for the current story. Include it even when the user already supplied a story, brief, or reference assets.
 
-- First: script package, per-shot line-art prompts, and text-only logic review.
-- After approval: parallel per-shot line art collected in the local HTML board.
-- After line-art approval: ordered per-shot and aggregate video prompts.
-- Optional on request: finished frames, line-art or finished-frame storyboard sheets, and target-model prompt adaptation.
+Present it in the user's language under two short labeled groups. In Chinese, use the headings `基本流程` and `可选交付`, and use the established terms `逐镜最终画面` and `分镜合集图` rather than alternate translations:
 
-Present the four items in the user's language. Keep the orientation to these four short list items, then immediately continue with the user's supplied material in the same response. The orientation is informational, not a new approval gate or a reason to delay setup. Do not ask the user to repeat or re-upload inputs just to present it. Once shown, do not repeat it in the same Codex task even if a session has not been created yet. Do not show it when continuing a resolvable existing session, later stage, or repair turn, and omit it when the user explicitly asks to skip the introduction.
+**Basic flow**
+
+1. Script planning: organize the story into an ordered shot package, write per-shot line-art prompts, and run text-only checks for logic, action paths, and continuity. Pause for script approval.
+2. Line-art production: after approval, dispatch multiple workers to generate per-shot line art, register every image, and collect the ordered results in the local HTML review board. Pause for line-art approval.
+3. Prompt delivery: after line-art approval, deliver complete per-shot video prompts and one ordered aggregate prompt.
+
+**Optional deliverables**
+
+- Finished frames based on the approved shots and a supplied image or text style reference.
+- A line-art or finished-frame storyboard sheet arranged in Shot order.
+- Prompt adaptation for a named video model or an explicitly requested image-guided workflow.
+
+Keep both groups compact, then immediately continue with the user's supplied material in the same response. The orientation is informational, not a new approval gate or a reason to delay setup. Do not ask the user to repeat or re-upload inputs just to present it. Once shown, do not repeat it in the same Codex task even if a session has not been created yet. Do not show it when continuing a resolvable existing session, later stage, or repair turn, and omit it when the user explicitly asks to skip the introduction.
 
 ## Copy-Ready Prompt Independence
 
