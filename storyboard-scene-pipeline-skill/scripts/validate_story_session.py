@@ -741,7 +741,12 @@ def validate_parallel_generation(state: dict[str, object], shots: list[dict[str,
         )
 
 
-def validate_video_readiness(state_path: Path, shots: list[dict[str, object]], failures: list[str]) -> None:
+def validate_video_readiness(
+    state_path: Path,
+    shots: list[dict[str, object]],
+    assets_dirname: str,
+    failures: list[str],
+) -> None:
     for shot in shots:
         shot_id = str(shot.get("id", "Unknown shot"))
         readiness = shot.get("video_readiness")
@@ -761,6 +766,16 @@ def validate_video_readiness(state_path: Path, shots: list[dict[str, object]], f
             )
             if not is_inline_data_reference(raw_first_frame):
                 first_frame = resolve_asset(state_path, raw_first_frame)
+                require(
+                    not Path(raw_first_frame).is_absolute(),
+                    f"{shot_id} first frame uses an absolute path: {raw_first_frame}",
+                    failures,
+                )
+                require(
+                    is_path_within(first_frame, state_path.parent / assets_dirname),
+                    f"{shot_id} first frame is outside the session assets directory: {raw_first_frame}",
+                    failures,
+                )
                 require(first_frame.exists(), f"{shot_id} first frame missing: {first_frame}", failures)
                 require(
                     first_frame.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp"},
@@ -856,11 +871,11 @@ def validate_html(html_path: Path, failures: list[str]) -> None:
         failures,
     )
     require("视频提示词" in html, "HTML is missing the video prompt column", failures)
-    require("gemini" not in html.lower(), "HTML should not expose alternate model prompts", failures)
+    require(not re.search(r"\bgemini\b", html, re.IGNORECASE), "HTML should not expose alternate model prompts", failures)
     require("Seedance 2.0" not in html, "HTML should label the visible video prompt generically, not as Seedance 2.0", failures)
     require(".svg" not in html.lower(), "HTML still references SVG assets", failures)
-    require("approved" not in html.lower(), "HTML exposes approved/draft process language", failures)
-    require("stage 1" not in html.lower() and "stage 2" not in html.lower(), "HTML exposes Stage 1/2 language", failures)
+    require(not re.search(r"\bapproved\b", html, re.IGNORECASE), "HTML exposes approved/draft process language", failures)
+    require(not re.search(r"\bstage\s+[12]\b", html, re.IGNORECASE), "HTML exposes Stage 1/2 language", failures)
 
 
 def validate_section_shapes(state: dict[str, object], failures: list[str]) -> None:
@@ -962,7 +977,7 @@ def validate(
         if isinstance(video_generation, dict) and "input_mode" in video_generation:
             input_mode = str(video_generation.get("input_mode", "")).strip().lower()
         validate_video_prompts(shots, failures, input_mode=input_mode)
-        validate_video_readiness(state_path, shots, failures)
+        validate_video_readiness(state_path, shots, assets_dirname, failures)
         validate_video_test(state, failures)
 
     validate_html(html_path, failures)
