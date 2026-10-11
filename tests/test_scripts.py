@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -14,6 +15,7 @@ sys.path.insert(0, str(SCRIPTS_DIR))
 
 from init_story_session import find_existing_sessions  # noqa: E402
 from release_audit import audit_text_files  # noqa: E402
+from validate_story_session import validate_video_readiness  # noqa: E402
 
 
 def run_script(name: str, *args: str, cwd: Path) -> subprocess.CompletedProcess[str]:
@@ -51,6 +53,22 @@ class InitSessionTests(WorkspaceTestCase):
         self.assertTrue(dog.parent.name.endswith("-dog"))
         self.assertFalse(dog.parent.name.endswith("-hot-dog"))
         self.assertEqual(self.init_session("Dog"), dog)
+
+    def test_render_failure_removes_half_created_session(self) -> None:
+        skill_copy = self.root / "skill"
+        shutil.copytree(REPO_ROOT / "storyboard-scene-pipeline-skill", skill_copy)
+        (skill_copy / "assets" / "story_session_template.html").unlink()
+
+        result = subprocess.run(
+            [sys.executable, str(skill_copy / "scripts" / "init_story_session.py"), "Broken"],
+            cwd=self.root,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("已删除未完成的 session 目录", result.stderr)
+        self.assertEqual(list((self.root / "sessions").iterdir()), [])
 
     def test_find_existing_sessions_orders_collision_suffix_after_base(self) -> None:
         sessions = self.root / "sessions"
@@ -98,6 +116,47 @@ class ValidateTests(WorkspaceTestCase):
         self.assertIn("line_art must be an object", result.stdout)
         self.assertIn("final_generation.gallery[0] must be an object", result.stdout)
         self.assertNotIn("未预期错误", result.stderr)
+
+    def test_process_language_check_matches_whole_words_only(self) -> None:
+        state_path = self.init_session("Words")
+        shots = [{"id": "Shot 01", "duration": "3", "frame": "f", "camera": "c", "action": "a"}]
+
+        self.edit_state(state_path, shots=shots, project_summary="An unapproved plan backstage 10 times.")
+        run_script("render_story_session.py", str(state_path), cwd=self.root)
+        clean = run_script("validate_story_session.py", "--profile", "smoke", str(state_path), cwd=self.root)
+
+        self.edit_state(state_path, project_summary="The plan was approved at stage 1.")
+        run_script("render_story_session.py", str(state_path), cwd=self.root)
+        leaky = run_script("validate_story_session.py", "--profile", "smoke", str(state_path), cwd=self.root)
+
+        self.assertEqual(clean.returncode, 0, clean.stdout)
+        self.assertEqual(leaky.returncode, 1)
+        self.assertIn("approved/draft process language", leaky.stdout)
+        self.assertIn("Stage 1/2 language", leaky.stdout)
+
+    def test_first_frame_path_must_stay_inside_assets(self) -> None:
+        state_path = self.root / "sessions" / "s" / "session.json"
+        (state_path.parent / "assets").mkdir(parents=True)
+        outside = self.root / "outside.jpg"
+        outside.write_bytes(b"\0")
+        readiness = {
+            "status": "s",
+            "motion_intensity": "m",
+            "camera_motion": "c",
+            "risk_level": "r",
+            "test_status": "t",
+            "must_preserve": ["x"],
+        }
+        shots = [
+            {"id": "Shot 01", "video_readiness": {**readiness, "first_frame_path": str(outside)}},
+            {"id": "Shot 02", "video_readiness": {**readiness, "first_frame_path": "../../outside.jpg"}},
+        ]
+
+        failures: list[str] = []
+        validate_video_readiness(state_path, shots, "assets", failures)
+
+        self.assertTrue(any("Shot 01 first frame uses an absolute path" in failure for failure in failures))
+        self.assertTrue(any("Shot 02 first frame is outside the session assets directory" in failure for failure in failures))
 
     def test_examples_pass_release_profile(self) -> None:
         for state_path in sorted((REPO_ROOT / "examples").glob("*/*/session.json")):
@@ -150,6 +209,29 @@ class RegisterAssetTests(WorkspaceTestCase):
         self.assertIn("已自动回滚", result.stderr)
         self.assertEqual(state_path.read_text(encoding="utf-8"), original_state)
         self.assertFalse((state_path.parent / "assets" / "shot01-line.jpg").exists())
+
+
+class SubprocessInterpreterTests(WorkspaceTestCase):
+    def test_child_scripts_use_the_running_interpreter(self) -> None:
+        fake_bin = self.root / "bin"
+        fake_bin.mkdir()
+        fake_python = fake_bin / "python3"
+        fake_python.write_text("#!/bin/sh\necho 'wrong interpreter' >&2\nexit 97\n", encoding="utf-8")
+        fake_python.chmod(0o755)
+        state_path = self.init_session("Interpreter")
+        patch_path = self.root / "patch.json"
+        patch_path.write_text(json.dumps({"project_summary": "updated"}), encoding="utf-8")
+
+        result = subprocess.run(
+            [sys.executable, str(SCRIPTS_DIR / "update_story_session.py"), str(state_path), str(patch_path)],
+            cwd=self.root,
+            capture_output=True,
+            text=True,
+            env={**os.environ, "PATH": f"{fake_bin}{os.pathsep}{os.environ.get('PATH', '')}"},
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("updated", state_path.read_text(encoding="utf-8"))
 
 
 class ReleaseAuditTests(unittest.TestCase):
