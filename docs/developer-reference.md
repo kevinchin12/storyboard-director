@@ -69,6 +69,12 @@ python3 storyboard-scene-pipeline-skill/scripts/build_public_bundle.py
 python3 storyboard-scene-pipeline-skill/scripts/release_audit.py
 ```
 
+10. 修改脚本后运行回归测试（仅依赖标准库和 Pillow）：
+
+```bash
+python3 -m unittest discover -s tests
+```
+
 ### 作为 Codex Skill 安装使用
 
 1. 把 `storyboard-scene-pipeline-skill` 复制到你的 skill 目录
