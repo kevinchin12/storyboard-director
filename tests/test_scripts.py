@@ -70,6 +70,17 @@ class InitSessionTests(WorkspaceTestCase):
         self.assertIn("已删除未完成的 session 目录", result.stderr)
         self.assertEqual(list((self.root / "sessions").iterdir()), [])
 
+    def test_reopen_render_failure_keeps_existing_session(self) -> None:
+        state_path = self.init_session("Existing")
+        state_path.write_text("[]", encoding="utf-8")
+
+        result = run_script("init_story_session.py", "Existing", cwd=self.root)
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("已有 session 渲染失败", result.stderr)
+        self.assertIn("不是 JSON object", result.stderr)
+        self.assertTrue(state_path.exists())
+
     def test_find_existing_sessions_orders_collision_suffix_after_base(self) -> None:
         sessions = self.root / "sessions"
         for name in ("20260101-120000-2-dog", "20260101-120000-dog", "20260101-120000-hot-dog", "20251231-235959-dog"):

@@ -88,9 +88,15 @@ def main() -> int:
                 Path(__file__).resolve().parent / "render_story_session.py",
                 ["--config", str(config.config_path), str(state_path)],
             )
-        except BaseException:
+        except BaseException as exc:
             # A half-created directory would be picked up as the existing session on the next run.
             shutil.rmtree(session_dir, ignore_errors=True)
+            if isinstance(exc, subprocess.CalledProcessError):
+                raise subprocess_failure_error(
+                    exc,
+                    problem="Session 渲染失败，已删除未完成的 session 目录",
+                    next_step="按上面的错误修复 skill 模板或环境后重新初始化。",
+                ) from exc
             raise
         print(state_path)
         return 0
@@ -101,8 +107,8 @@ def main() -> int:
         print_error(
             subprocess_failure_error(
                 error,
-                problem="Session 渲染失败，已删除未完成的 session 目录",
-                next_step="按上面的错误修复 skill 模板或环境后重新初始化。",
+                problem="已有 session 渲染失败",
+                next_step="按上面的错误修正该 session 的 session.json，或用 --new 新建 session。",
             )
         )
         return 1

@@ -25,6 +25,7 @@ from storyboard_common import (
 
 PLACEHOLDER_RE = re.compile(r"\{\{[A-Z0-9_]+\}\}")
 
+
 def e(text: object) -> str:
     return escape("" if text is None else str(text), quote=True)
 
