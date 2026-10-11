@@ -42,8 +42,20 @@ def iter_audit_files(target: Path):
             yield path
 
 
-def audit_text_files(target: Path, failures: list[str]) -> None:
+def is_excluded_from_bundle(path: Path) -> bool:
+    return (
+        "__pycache__" in path.parts
+        or ".git" in path.parts
+        or path.name == ".DS_Store"
+        or path.suffix.lower() in {".pyc", ".pyo"}
+    )
+
+
+def audit_text_files(target: Path, failures: list[str], skip_bundle_excluded: bool = False) -> None:
     for path in iter_audit_files(target):
+        # Source trees pick up bytecode as soon as any script runs; build_bundle drops it via COPY_IGNORE.
+        if skip_bundle_excluded and is_excluded_from_bundle(path):
+            continue
         if path.is_symlink():
             failures.append(f"发现符号链接，bundle 可能复制工作区外内容: {path}")
             continue
@@ -246,7 +258,7 @@ def main() -> int:
         for path in bundle_targets:
             if not path.exists():
                 continue
-            audit_text_files(path, failures)
+            audit_text_files(path, failures, skip_bundle_excluded=True)
             audit_private_markers(path, failures)
         built_bundle = build_bundle(root, manifest)
         audit_built_artifact(built_bundle, failures)
