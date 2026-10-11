@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -18,6 +19,16 @@ from storyboard_common import (
     session_paths,
     slugify,
 )
+
+
+def find_existing_sessions(sessions_dir: Path, slug: str) -> list[Path]:
+    pattern = re.compile(rf"(\d{{8}}-\d{{6}})(?:-(\d+))?-{re.escape(slug)}")
+    matches: list[tuple[str, int, Path]] = []
+    for path in sessions_dir.iterdir():
+        match = pattern.fullmatch(path.name)
+        if match and path.is_dir():
+            matches.append((match.group(1), int(match.group(2) or 1), path))
+    return [path for _, _, path in sorted(matches)]
 
 
 def main() -> int:
@@ -38,7 +49,7 @@ def main() -> int:
         ensure_workspace_dirs(config)
 
         slug = slugify(title)
-        matches = sorted(config.sessions_dir.glob(f"*-{slug}"))
+        matches = find_existing_sessions(config.sessions_dir, slug)
         if matches and not args.new:
             state_path, _, _ = session_paths(config, matches[-1])
             run_python_script(
