@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import re
+import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -18,6 +19,7 @@ from storyboard_common import (
     run_python_script,
     session_paths,
     slugify,
+    subprocess_failure_error,
 )
 
 
@@ -89,6 +91,15 @@ def main() -> int:
         return 0
     except StoryboardError as error:
         print_error(error)
+        return 1
+    except subprocess.CalledProcessError as error:
+        print_error(
+            subprocess_failure_error(
+                error,
+                problem="Session 已创建但渲染失败",
+                next_step="按上面的错误修正 session.json 后，单独运行 render_story_session.py。",
+            )
+        )
         return 1
     except Exception as error:  # pragma: no cover - defensive CLI fallback
         print("问题: 初始化脚本发生未预期错误", file=sys.stderr)

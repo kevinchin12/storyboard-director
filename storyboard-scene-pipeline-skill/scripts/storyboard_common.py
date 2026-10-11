@@ -522,6 +522,19 @@ def run_python_script(script_path: Path, args: list[str]) -> subprocess.Complete
     )
 
 
+def subprocess_failure_error(
+    exc: subprocess.CalledProcessError,
+    problem: str,
+    next_step: str,
+) -> StoryboardError:
+    detail = "\n".join(part.strip() for part in (exc.stdout or "", exc.stderr or "") if part.strip())
+    return StoryboardError(
+        problem=problem,
+        reason=detail or f"子命令退出码: {exc.returncode}",
+        next_step=next_step,
+    )
+
+
 def discover_sessions(config: WorkspaceConfig) -> list[Path]:
     if not config.sessions_dir.exists():
         return []
