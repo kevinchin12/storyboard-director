@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 from io import BytesIO
+import subprocess
 import sys
 from pathlib import Path
 
@@ -21,6 +22,7 @@ from storyboard_common import (
     run_python_script,
     session_html_path,
     shot_asset_for,
+    subprocess_failure_error,
     write_bytes_atomic,
     write_text_atomic,
 )
@@ -297,7 +299,7 @@ def main() -> int:
                 validate_script,
                 ["--config", str(config.config_path), "--profile", args.validate_profile, str(state_path)],
             )
-        except Exception:
+        except Exception as exc:
             write_text_atomic(state_path, original_state_text)
             if original_html_text is None:
                 if html_path.exists():
@@ -309,6 +311,12 @@ def main() -> int:
                     target.unlink()
             else:
                 write_bytes_atomic(target, original_target)
+            if isinstance(exc, subprocess.CalledProcessError):
+                raise subprocess_failure_error(
+                    exc,
+                    problem="合并分镜图未通过渲染或校验，已自动回滚",
+                    next_step="按上面的校验项修正 session 后重试；原 session.json、HTML 和分镜图已恢复。",
+                ) from exc
             raise
 
         print(state_path)

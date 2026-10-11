@@ -515,11 +515,34 @@ def ensure_state_shape(state: dict[str, object]) -> dict[str, object]:
 
 def run_python_script(script_path: Path, args: list[str]) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        ["python3", str(script_path), *args],
+        [sys.executable, str(script_path), *args],
         check=True,
         capture_output=True,
         text=True,
     )
+
+
+def subprocess_failure_error(
+    exc: subprocess.CalledProcessError,
+    problem: str,
+    next_step: str,
+) -> StoryboardError:
+    detail = "\n".join(part.strip() for part in (exc.stdout or "", exc.stderr or "") if part.strip())
+    return StoryboardError(
+        problem=problem,
+        reason=detail or f"子命令退出码: {exc.returncode}",
+        next_step=next_step,
+    )
+
+
+def section_gallery(state: dict[str, object], section_name: str) -> list[dict[str, object]]:
+    section = state.get(section_name, {})
+    if not isinstance(section, dict):
+        return []
+    gallery = section.get("gallery", [])
+    if not isinstance(gallery, list):
+        return []
+    return [item for item in gallery if isinstance(item, dict)]
 
 
 def discover_sessions(config: WorkspaceConfig) -> list[Path]:

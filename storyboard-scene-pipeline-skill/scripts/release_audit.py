@@ -42,8 +42,20 @@ def iter_audit_files(target: Path):
             yield path
 
 
-def audit_text_files(target: Path, failures: list[str]) -> None:
+def is_excluded_from_bundle(path: Path) -> bool:
+    return (
+        "__pycache__" in path.parts
+        or ".git" in path.parts
+        or path.name == ".DS_Store"
+        or path.suffix.lower() in {".pyc", ".pyo"}
+    )
+
+
+def audit_text_files(target: Path, failures: list[str], skip_bundle_excluded: bool = False) -> None:
     for path in iter_audit_files(target):
+        # Source trees pick up bytecode as soon as any script runs; build_bundle drops it via COPY_IGNORE.
+        if skip_bundle_excluded and is_excluded_from_bundle(path):
+            continue
         if path.is_symlink():
             failures.append(f"发现符号链接，bundle 可能复制工作区外内容: {path}")
             continue
@@ -134,7 +146,7 @@ def audit_examples(root: Path, failures: list[str]) -> None:
             workspace_args = ["--workspace-root", str(temp_root)]
 
             render = subprocess.run(
-                ["python3", str(render_script), str(working_session), *workspace_args],
+                [sys.executable, str(render_script), str(working_session), *workspace_args],
                 capture_output=True,
                 text=True,
             )
@@ -142,7 +154,7 @@ def audit_examples(root: Path, failures: list[str]) -> None:
                 failures.append(f"示例渲染失败: {session_path}\n{render.stderr.strip()}")
                 continue
             validate = subprocess.run(
-                ["python3", str(validate_script), "--profile", profile, str(working_session), *workspace_args],
+                [sys.executable, str(validate_script), "--profile", profile, str(working_session), *workspace_args],
                 capture_output=True,
                 text=True,
             )
@@ -150,7 +162,7 @@ def audit_examples(root: Path, failures: list[str]) -> None:
                 failures.append(f"示例校验失败: {session_path}\n{validate.stdout.strip()}\n{validate.stderr.strip()}")
                 continue
             asset_audit = subprocess.run(
-                ["python3", str(asset_audit_script), str(working_session), *workspace_args],
+                [sys.executable, str(asset_audit_script), str(working_session), *workspace_args],
                 capture_output=True,
                 text=True,
             )
@@ -159,7 +171,7 @@ def audit_examples(root: Path, failures: list[str]) -> None:
                 continue
             handoff_output = working_dir / ".release-audit-handoff.md"
             handoff = subprocess.run(
-                ["python3", str(handoff_script), str(working_session), "--output", str(handoff_output), *workspace_args],
+                [sys.executable, str(handoff_script), str(working_session), "--output", str(handoff_output), *workspace_args],
                 capture_output=True,
                 text=True,
             )
@@ -200,7 +212,7 @@ def audit_built_artifact(bundle_root: Path, failures: list[str]) -> None:
         installer = bundle_root / "storyboard-scene-pipeline-skill" / "scripts" / "install_storyboard_skills.py"
         doctor = bundle_root / "storyboard-scene-pipeline-skill" / "scripts" / "doctor_storyboard_skill.py"
         install = subprocess.run(
-            ["python3", str(installer), "--copy", "--codex-home", codex_home],
+            [sys.executable, str(installer), "--copy", "--codex-home", codex_home],
             capture_output=True,
             text=True,
         )
@@ -209,7 +221,7 @@ def audit_built_artifact(bundle_root: Path, failures: list[str]) -> None:
             return
         health = subprocess.run(
             [
-                "python3",
+                sys.executable,
                 str(doctor),
                 "--workspace-root",
                 str(bundle_root),
@@ -246,7 +258,7 @@ def main() -> int:
         for path in bundle_targets:
             if not path.exists():
                 continue
-            audit_text_files(path, failures)
+            audit_text_files(path, failures, skip_bundle_excluded=True)
             audit_private_markers(path, failures)
         built_bundle = build_bundle(root, manifest)
         audit_built_artifact(built_bundle, failures)

@@ -18,6 +18,7 @@ from storyboard_common import (
     resolve_workspace_config,
     run_python_script,
     session_html_path,
+    subprocess_failure_error,
     write_text_atomic,
 )
 
@@ -97,10 +98,9 @@ def main() -> int:
             else:
                 write_text_atomic(html_path, original_html_text)
             if isinstance(exc, subprocess.CalledProcessError):
-                detail = "\n".join(part.strip() for part in (exc.stdout or "", exc.stderr or "") if part.strip())
-                raise StoryboardError(
+                raise subprocess_failure_error(
+                    exc,
                     problem="Session 更新未通过渲染或校验，已自动回滚",
-                    reason=detail or f"子命令退出码: {exc.returncode}",
                     next_step="修正 patch 后重试；原 session.json 和 HTML 已恢复。",
                 ) from exc
             raise

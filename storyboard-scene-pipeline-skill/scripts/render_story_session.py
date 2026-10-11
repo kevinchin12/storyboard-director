@@ -17,10 +17,14 @@ from storyboard_common import (
     print_error,
     resolve_state_path,
     resolve_workspace_config,
+    section_gallery,
     session_html_path,
     shot_asset_for,
     write_text_atomic,
 )
+
+PLACEHOLDER_RE = re.compile(r"\{\{[A-Z0-9_]+\}\}")
+
 
 def e(text: object) -> str:
     return escape("" if text is None else str(text), quote=True)
@@ -282,7 +286,7 @@ def readiness_summary_html(shots: list[dict[str, object]], show_durations: bool)
     )
 
 
-def video_delivery_html(state: dict[str, object]) -> str:
+def video_delivery_html(state: dict[str, object], shots: list[dict[str, object]]) -> str:
     refs = state.get("production_reference", {})
     if not isinstance(refs, dict):
         refs = {}
@@ -328,7 +332,7 @@ def video_delivery_html(state: dict[str, object]) -> str:
         platform_check=e(platform_check),
         why_this_shot=nl2br(video_test.get("why_this_shot", "待填写")),
         pass_criteria=list_html(video_test.get("pass_criteria", [])),
-        readiness=readiness_summary_html(state.get("shots", []), is_enabled(state, "show_durations", False)),
+        readiness=readiness_summary_html(shots, is_enabled(state, "show_durations", False)),
     )
 
 
@@ -579,11 +583,24 @@ def shot_overview_html(
 def render(state_path: Path, html_path: Path | None = None) -> Path:
     skill_root = Path(__file__).resolve().parents[1]
     template_path = skill_root / "assets" / "story_session_template.html"
-    state = ensure_state_shape(json.loads(state_path.read_text(encoding="utf-8")))
+    state = json.loads(state_path.read_text(encoding="utf-8"))
+    if not isinstance(state, dict):
+        raise StoryboardError(
+            problem="Session 结构错误",
+            reason=f"{state_path} 不是 JSON object。",
+            next_step="检查 session.json，或重新初始化 session。",
+        )
+    state = ensure_state_shape(state)
     template = template_path.read_text(encoding="utf-8")
 
     html_path = html_path or state_path.with_suffix(".html")
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
+    raw_shots = state.get("shots", [])
+    shots = [shot for shot in raw_shots if isinstance(shot, dict)] if isinstance(raw_shots, list) else []
+    line_gallery = section_gallery(state, "line_art")
+    final_gallery = section_gallery(state, "final_generation")
+    outline = state.get("outline", {})
+    outline_text = outline.get("text", "") if isinstance(outline, dict) else ""
 
     replacements = {
         "{{PROJECT_TITLE}}": e(state.get("project_title", "Story Session")),
@@ -595,31 +612,30 @@ def render(state_path: Path, html_path: Path | None = None) -> Path:
         "{{ASPECT_RATIO}}": e(state.get("aspect_ratio", "16:9")),
         "{{LAST_UPDATED}}": e(now),
         "{{STATE_FILE}}": e(state_path.name),
-        "{{OUTLINE_TEXT}}": nl2br(state.get("outline", {}).get("text", "")),
+        "{{OUTLINE_TEXT}}": nl2br(outline_text),
         "{{VISUAL_REFERENCES}}": visual_references_html(state, state_path),
         "{{TEXT_REVIEW}}": text_review_html(state),
-        "{{VIDEO_DELIVERY}}": video_delivery_html(state),
+        "{{VIDEO_DELIVERY}}": video_delivery_html(state, shots),
         "{{SHOT_BOARDS}}": shot_boards_html(
-            state.get("shots", []),
-            state.get("line_art", {}).get("gallery", []),
-            state.get("final_generation", {}).get("gallery", []),
+            shots,
+            line_gallery,
+            final_gallery,
             state_path,
             is_enabled(state, "show_final_frames", False),
             is_enabled(state, "show_durations", False),
         ),
         "{{SHOT_OVERVIEW}}": shot_overview_html(
-            state.get("shots", []),
-            state.get("line_art", {}).get("gallery", []),
-            state.get("final_generation", {}).get("gallery", []),
+            shots,
+            line_gallery,
+            final_gallery,
             state_path,
             state,
         ),
         "{{AGGREGATE_PROMPT_SECTION}}": aggregate_prompt_html(state, state_path),
     }
 
-    rendered = template
-    for key, value in replacements.items():
-        rendered = rendered.replace(key, value)
+    # Single pass so placeholder text inside user content is never expanded by a later replacement.
+    rendered = PLACEHOLDER_RE.sub(lambda match: replacements.get(match.group(0), match.group(0)), template)
 
     rendered = "\n".join(line.rstrip() for line in rendered.splitlines()) + "\n"
     write_text_atomic(html_path, rendered)

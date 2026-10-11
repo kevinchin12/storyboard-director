@@ -137,7 +137,7 @@ def run_register(
     config_path: Path,
 ) -> subprocess.CompletedProcess[str]:
     args = [
-        "python3",
+        sys.executable,
         str(script_dir / "register_story_asset.py"),
         str(state_path),
         "--asset-type",
