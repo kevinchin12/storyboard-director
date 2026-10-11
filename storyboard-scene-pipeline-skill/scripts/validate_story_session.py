@@ -18,6 +18,7 @@ from storyboard_common import (
     print_error,
     resolve_state_path,
     resolve_workspace_config,
+    section_gallery,
     session_html_path,
     shot_asset_for,
 )
@@ -354,7 +355,8 @@ def should_require_final_assets(state: dict[str, object], profile: str) -> bool:
         return False
     if profile == "release":
         return True
-    status = str(state.get("final_generation", {}).get("status", "")).strip().lower()
+    final_generation = state.get("final_generation", {})
+    status = str(final_generation.get("status", "") if isinstance(final_generation, dict) else "").strip().lower()
     return stage_index(state.get("current_stage")) >= STAGE_ORDER.index("final") and any(
         token in status for token in ("ready", "complete", "user review")
     )
@@ -861,7 +863,25 @@ def validate_html(html_path: Path, failures: list[str]) -> None:
     require("stage 1" not in html.lower() and "stage 2" not in html.lower(), "HTML exposes Stage 1/2 language", failures)
 
 
+def validate_section_shapes(state: dict[str, object], failures: list[str]) -> None:
+    for section_name in ("line_art", "final_generation"):
+        if section_name not in state:
+            continue
+        section = state[section_name]
+        require(isinstance(section, dict), f"{section_name} must be an object", failures)
+        if not isinstance(section, dict) or "gallery" not in section:
+            continue
+        gallery = section["gallery"]
+        require(isinstance(gallery, list), f"{section_name}.gallery must be a list", failures)
+        if isinstance(gallery, list):
+            for index, item in enumerate(gallery):
+                require(isinstance(item, dict), f"{section_name}.gallery[{index}] must be an object", failures)
+    if "outline" in state:
+        require(isinstance(state["outline"], dict), "outline must be an object", failures)
+
+
 def validate_base(state: dict[str, object], failures: list[str]) -> list[dict[str, object]]:
+    validate_section_shapes(state, failures)
     aspect_ratio = str(state.get("aspect_ratio", "")).strip()
     require(bool(aspect_ratio), "aspect_ratio is missing; default to 16:9 if the user did not specify one", failures)
     if aspect_ratio:
@@ -905,16 +925,19 @@ def validate(
 ) -> list[str]:
     failures: list[str] = []
     raw_state = state_path.read_text(encoding="utf-8")
-    state = ensure_state_shape(json.loads(raw_state))
+    loaded = json.loads(raw_state)
+    if not isinstance(loaded, dict):
+        return ["session.json must be a JSON object"]
+    state = ensure_state_shape(loaded)
     html_path = html_path or state_path.with_suffix(".html")
     validate_session_weight(state_path, raw_state, state, failures)
     shots = validate_base(state, failures)
 
     if profile == "smoke":
         validate_html(html_path, failures)
-        validate_html_asset_links(state_path, shots, state.get("line_art", {}).get("gallery", []), "line_art", html_path, failures)
+        validate_html_asset_links(state_path, shots, section_gallery(state, "line_art"), "line_art", html_path, failures)
         if display_option_enabled(state, "show_final_frames", False):
-            validate_html_asset_links(state_path, shots, state.get("final_generation", {}).get("gallery", []), "final_generation", html_path, failures)
+            validate_html_asset_links(state_path, shots, section_gallery(state, "final_generation"), "final_generation", html_path, failures)
         return failures
 
     validate_shot_continuity_logic(shots, failures)
@@ -928,10 +951,10 @@ def validate(
     validate_storyboard_sheet(state_path, state, profile, html_path, assets_dirname, failures)
 
     if should_require_line_art(state, profile):
-        validate_asset_gallery(state_path, state.get("line_art", {}).get("gallery", []), "line_art", shots, assets_dirname, failures)
+        validate_asset_gallery(state_path, section_gallery(state, "line_art"), "line_art", shots, assets_dirname, failures)
 
     if should_require_final_assets(state, profile):
-        validate_asset_gallery(state_path, state.get("final_generation", {}).get("gallery", []), "final_generation", shots, assets_dirname, failures)
+        validate_asset_gallery(state_path, section_gallery(state, "final_generation"), "final_generation", shots, assets_dirname, failures)
 
     if should_require_video_package(state, profile):
         video_generation = state.get("video_generation", {})
@@ -943,9 +966,9 @@ def validate(
         validate_video_test(state, failures)
 
     validate_html(html_path, failures)
-    validate_html_asset_links(state_path, shots, state.get("line_art", {}).get("gallery", []), "line_art", html_path, failures)
+    validate_html_asset_links(state_path, shots, section_gallery(state, "line_art"), "line_art", html_path, failures)
     if display_option_enabled(state, "show_final_frames", False):
-        validate_html_asset_links(state_path, shots, state.get("final_generation", {}).get("gallery", []), "final_generation", html_path, failures)
+        validate_html_asset_links(state_path, shots, section_gallery(state, "final_generation"), "final_generation", html_path, failures)
     return failures
 
 

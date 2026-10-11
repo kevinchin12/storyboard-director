@@ -535,6 +535,16 @@ def subprocess_failure_error(
     )
 
 
+def section_gallery(state: dict[str, object], section_name: str) -> list[dict[str, object]]:
+    section = state.get(section_name, {})
+    if not isinstance(section, dict):
+        return []
+    gallery = section.get("gallery", [])
+    if not isinstance(gallery, list):
+        return []
+    return [item for item in gallery if isinstance(item, dict)]
+
+
 def discover_sessions(config: WorkspaceConfig) -> list[Path]:
     if not config.sessions_dir.exists():
         return []
