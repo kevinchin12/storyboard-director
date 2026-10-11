@@ -515,7 +515,7 @@ def ensure_state_shape(state: dict[str, object]) -> dict[str, object]:
 
 def run_python_script(script_path: Path, args: list[str]) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        ["python3", str(script_path), *args],
+        [sys.executable, str(script_path), *args],
         check=True,
         capture_output=True,
         text=True,

@@ -146,7 +146,7 @@ def audit_examples(root: Path, failures: list[str]) -> None:
             workspace_args = ["--workspace-root", str(temp_root)]
 
             render = subprocess.run(
-                ["python3", str(render_script), str(working_session), *workspace_args],
+                [sys.executable, str(render_script), str(working_session), *workspace_args],
                 capture_output=True,
                 text=True,
             )
@@ -154,7 +154,7 @@ def audit_examples(root: Path, failures: list[str]) -> None:
                 failures.append(f"示例渲染失败: {session_path}\n{render.stderr.strip()}")
                 continue
             validate = subprocess.run(
-                ["python3", str(validate_script), "--profile", profile, str(working_session), *workspace_args],
+                [sys.executable, str(validate_script), "--profile", profile, str(working_session), *workspace_args],
                 capture_output=True,
                 text=True,
             )
@@ -162,7 +162,7 @@ def audit_examples(root: Path, failures: list[str]) -> None:
                 failures.append(f"示例校验失败: {session_path}\n{validate.stdout.strip()}\n{validate.stderr.strip()}")
                 continue
             asset_audit = subprocess.run(
-                ["python3", str(asset_audit_script), str(working_session), *workspace_args],
+                [sys.executable, str(asset_audit_script), str(working_session), *workspace_args],
                 capture_output=True,
                 text=True,
             )
@@ -171,7 +171,7 @@ def audit_examples(root: Path, failures: list[str]) -> None:
                 continue
             handoff_output = working_dir / ".release-audit-handoff.md"
             handoff = subprocess.run(
-                ["python3", str(handoff_script), str(working_session), "--output", str(handoff_output), *workspace_args],
+                [sys.executable, str(handoff_script), str(working_session), "--output", str(handoff_output), *workspace_args],
                 capture_output=True,
                 text=True,
             )
@@ -212,7 +212,7 @@ def audit_built_artifact(bundle_root: Path, failures: list[str]) -> None:
         installer = bundle_root / "storyboard-scene-pipeline-skill" / "scripts" / "install_storyboard_skills.py"
         doctor = bundle_root / "storyboard-scene-pipeline-skill" / "scripts" / "doctor_storyboard_skill.py"
         install = subprocess.run(
-            ["python3", str(installer), "--copy", "--codex-home", codex_home],
+            [sys.executable, str(installer), "--copy", "--codex-home", codex_home],
             capture_output=True,
             text=True,
         )
@@ -221,7 +221,7 @@ def audit_built_artifact(bundle_root: Path, failures: list[str]) -> None:
             return
         health = subprocess.run(
             [
-                "python3",
+                sys.executable,
                 str(doctor),
                 "--workspace-root",
                 str(bundle_root),
